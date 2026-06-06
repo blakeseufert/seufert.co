@@ -17,11 +17,20 @@
 
     <div class="role-list" aria-label="Roles">
       {% for role in site.roles %}
-        <p><span class="role-list__mark" aria-hidden="true">{{ role.org | first }}</span><strong>{{ role.org }}</strong> <span>{{ role.title }}</span></p>
+        <section class="role-list__item">
+          <p><strong>{{ role.org }}</strong> <span>{{ role.title }}</span></p>
+          {% if role.links %}
+            <div class="role-list__links" aria-label="{{ role.org }} links">
+              {% for link in role.links %}
+                <span class="pill pill--small role-list__badge role-list__badge--{{ link.tone }}">{{ link.label }}</span>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </section>
       {% endfor %}
     </div>
 
-    <p class="profile-panel__bio">Working with schools, founders, and teams to build systems that last beyond the launch.</p>
+    <p class="profile-panel__bio">{{ site.bio }}</p>
     <a class="profile-panel__more" href="mailto:hello@seufert.co">More About Blake <span aria-hidden="true">⌄</span></a>
   </aside>
 

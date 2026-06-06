@@ -202,6 +202,7 @@ button.pill {
 }
 
 .role-list p,
+.role-list__item,
 .profile-panel__bio {
   margin: 0;
 }
@@ -210,8 +211,46 @@ button.pill {
   color: var(--ink);
 }
 
-.role-list span {
+.role-list p span {
   display: block;
+}
+
+.role-list__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.28rem;
+  justify-content: center;
+  margin-top: 0.28rem;
+}
+
+.role-list__badge {
+  font-size: 0.5rem;
+  min-height: 1rem;
+  padding: 0.25rem 0.34rem;
+}
+
+.role-list__badge--green {
+  background: #e2f7ee;
+  border-color: #96e4c5;
+  color: #247b5c;
+}
+
+.role-list__badge--blue {
+  background: #e9f3ff;
+  border-color: #a8d2ff;
+  color: #2d628f;
+}
+
+.role-list__badge--coral {
+  background: #fde9ed;
+  border-color: #f4b5c0;
+  color: #a64758;
+}
+
+.role-list__badge--dark {
+  background: #e5ece5;
+  border-color: #b8c8bb;
+  color: #2a3c2e;
 }
 
 .profile-panel__bio {
@@ -586,8 +625,8 @@ figcaption {
 
   .role-list {
     font-size: 0.74rem;
-    gap: 1.15rem;
-    margin-bottom: 39px;
+    gap: 1.05rem;
+    margin-bottom: 32px;
   }
 
   .role-list p {
@@ -620,8 +659,21 @@ figcaption {
     text-underline-offset: 0.12em;
   }
 
-  .role-list span:not(.role-list__mark) {
+  .role-list p span:not(.role-list__mark) {
     color: #977c70;
+  }
+
+  .role-list__links {
+    gap: 0.3rem;
+    margin-top: 0.32rem;
+  }
+
+  .role-list__badge {
+    border-radius: 4px;
+    font-size: 0.48rem;
+    letter-spacing: 0;
+    min-height: 0.95rem;
+    padding: 0.22rem 0.34rem;
   }
 
   .profile-panel__bio {
@@ -629,7 +681,7 @@ figcaption {
     font-size: 0.72rem;
     line-height: 1.35;
     margin: 0 auto 12px;
-    max-height: 53px;
+    max-height: 78px;
     max-width: 254px;
     overflow: hidden;
   }

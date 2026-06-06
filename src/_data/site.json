@@ -5,6 +5,7 @@
   "tagline": "Building lasting, high quality systems and technology",
   "description": "Writing on technology, education systems, risk, and sustainable digital operations.",
   "profileImage": "/assets/uploads/blake-profile.png",
+  "bio": "Blake has worked with major companies like Google and Microsoft, as well as over 100 schools and school groups in Australia. He has spoken at conferences and been published in top publications.",
   "social": [
     {
       "label": "Email",
@@ -21,20 +22,48 @@
   ],
   "roles": [
     {
-      "org": "McKinnon SC",
-      "title": "Systems Manager"
+      "org": "McKinnon Secondary College",
+      "title": "Systems Manager",
+      "links": [
+        {
+          "label": "IT at McKinnon",
+          "tone": "blue"
+        }
+      ]
     },
     {
       "org": "Naavi",
-      "title": "Co-Founder"
+      "title": "Co-Founder",
+      "links": [
+        {
+          "label": "iNewsletter",
+          "tone": "green"
+        },
+        {
+          "label": "Naavi Sites",
+          "tone": "blue"
+        }
+      ]
     },
     {
       "org": "CoET",
-      "title": "Founding Member"
+      "title": "Founding Member",
+      "links": [
+        {
+          "label": "Confidence Framework",
+          "tone": "coral"
+        }
+      ]
     },
     {
       "org": "FloatLab",
-      "title": "Co-Founder"
+      "title": "Co-Founder",
+      "links": [
+        {
+          "label": "FloatLab",
+          "tone": "dark"
+        }
+      ]
     }
   ]
 }
