@@ -1,0 +1,36 @@
+{
+  "name": "seufert.co",
+  "url": "https://seufert.co",
+  "author": "Blake Seufert",
+  "tagline": "Building lasting, high quality systems and technology",
+  "description": "Writing on technology, education systems, risk, and sustainable digital operations.",
+  "profileImage": "/assets/uploads/blake-profile.png",
+  "social": [
+    {
+      "label": "Email",
+      "url": "mailto:hello@seufert.co"
+    },
+    {
+      "label": "LinkedIn",
+      "url": "https://www.linkedin.com/"
+    },
+    {
+      "label": "GitHub",
+      "url": "https://github.com/"
+    }
+  ],
+  "roles": [
+    {
+      "org": "McKinnon SC",
+      "title": "Systems Manager"
+    },
+    {
+      "org": "Naavi",
+      "title": "Co-Founder"
+    },
+    {
+      "org": "CoET",
+      "title": "Founding Member"
+    }
+  ]
+}

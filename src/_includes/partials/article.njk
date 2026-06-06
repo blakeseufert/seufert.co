@@ -1,0 +1,67 @@
+<div class="site-shell">
+  {% set postData = post.data if post.data else {
+    title: title,
+    tags: tags,
+    cover: cover,
+    coverAlt: coverAlt,
+    excerpt: excerpt
+  } %}
+  {% set postDate = post.date or page.date %}
+  {% set postUrl = post.url or page.url %}
+  <aside class="profile-panel" aria-label="About {{ site.author }}">
+    <img class="profile-panel__image" src="{{ site.profileImage }}" alt="{{ site.author }}">
+    <h1 class="profile-panel__name">{{ site.author }}</h1>
+    <p class="profile-panel__tagline">{{ site.tagline }}</p>
+
+    <div class="role-list" aria-label="Roles">
+      {% for role in site.roles %}
+        <p><strong>{{ role.org }}</strong> <span>{{ role.title }}</span></p>
+      {% endfor %}
+    </div>
+
+    <p class="profile-panel__bio">Working with schools, founders, and teams to build systems that last beyond the launch.</p>
+    <a class="pill pill--soft" href="mailto:hello@seufert.co">Say hello</a>
+  </aside>
+
+  <article class="article-layout">
+    <header class="article-hero">
+      <div class="article-kicker">
+        {% for tag in postData.tags %}
+          {% if tag != "posts" %}
+            <span class="pill">{{ tag }}</span>
+          {% endif %}
+        {% endfor %}
+      </div>
+      <h1>{{ postData.title }}</h1>
+      {% if postData.cover %}
+        <img class="article-cover" src="{{ postData.cover }}" alt="{{ postData.coverAlt or postData.title }}">
+      {% endif %}
+      <div class="article-meta">
+        <time datetime="{{ postDate | isoDate }}">{{ postDate | readableDate }}</time>
+        <button class="pill pill--button" type="button" onclick="navigator.share ? navigator.share({ title: document.title, url: location.href }) : navigator.clipboard.writeText(location.href)">Share</button>
+      </div>
+    </header>
+
+    <div class="post-body">
+      {% if post.templateContent %}
+        {{ post.templateContent | safe }}
+      {% else %}
+        {{ content | safe }}
+      {% endif %}
+    </div>
+
+    <footer class="more-posts" aria-label="More posts">
+      {% for item in collections.posts %}
+        {% if item.url != postUrl and loop.index0 < 4 %}
+          <a class="more-post" href="{{ item.url }}">
+            {% if item.data.cover %}
+              <img src="{{ item.data.cover }}" alt="" loading="lazy">
+            {% endif %}
+            <span>{{ item.data.title }}</span>
+            <time datetime="{{ item.date | isoDate }}">{{ item.date | readableDate }}</time>
+          </a>
+        {% endif %}
+      {% endfor %}
+    </footer>
+  </article>
+</div>

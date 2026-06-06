@@ -1,0 +1,69 @@
+---
+permalink: /editor/
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Editor | seufert.co</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <nav class="icon-links" aria-label="Editor links">
+        <a class="icon-link" href="/" aria-label="Home">S</a>
+      </nav>
+      <a class="site-mark" href="/">seufert.co</a>
+      <button class="pill pill--soft pill--small" id="authButton" type="button">Connect</button>
+    </header>
+
+    <main class="admin-shell">
+      <section class="editor-panel" aria-label="Post settings">
+        <h1>Post</h1>
+        <label>Title <input id="titleInput" autocomplete="off" value="Untitled note"></label>
+        <label>Slug <input id="slugInput" autocomplete="off" value="untitled-note"></label>
+        <label>Date <input id="dateInput" type="date"></label>
+        <label>Excerpt <textarea id="excerptInput"></textarea></label>
+        <label>Tags <input id="tagsInput" value="Systems, Notes"></label>
+        <label>Cover path <input id="coverInput" placeholder="/assets/uploads/example.png"></label>
+
+        <h1>Repository</h1>
+        <label>Owner <input id="ownerInput" value="blakeseufert" autocomplete="off"></label>
+        <label>Repo <input id="repoInput" value="seufert.co" autocomplete="off"></label>
+        <label>Branch <input id="branchInput" value="main" autocomplete="off"></label>
+        <label>OAuth client ID <input id="clientInput" autocomplete="off"></label>
+
+        <div class="editor-actions">
+          <button class="pill pill--button" id="saveConfigButton" type="button">Save config</button>
+          <button class="pill pill--button" id="savePostButton" type="button">Publish</button>
+        </div>
+        <p class="status-line" id="statusLine"></p>
+      </section>
+
+      <section aria-label="Editor">
+        <div class="editor-toolbar" aria-label="Formatting">
+          <button class="pill pill--button" data-command="h2" type="button">H2</button>
+          <button class="pill pill--button" data-command="h3" type="button">H3</button>
+          <button class="pill pill--button" data-command="bold" type="button">B</button>
+          <button class="pill pill--button" data-command="link" type="button">Link</button>
+          <button class="pill pill--button" data-command="ul" type="button">List</button>
+          <button class="pill pill--button" data-command="quote" type="button">Quote</button>
+          <button class="pill pill--button" data-command="pullquote" type="button">Pull quote</button>
+          <button class="pill pill--button" data-command="embed" type="button">Embed</button>
+          <label class="pill pill--button">Image <input id="imageInput" type="file" accept="image/*" hidden></label>
+        </div>
+        <article class="editor-canvas post-body" id="editorCanvas" contenteditable="true">
+          <p>Start with a short opening paragraph. The public post layout will automatically apply the drop cap.</p>
+          <h2>A Clear Section</h2>
+          <p>Use markdown-style shortcuts while writing: type ##, ###, -, or > followed by space at the start of a line.</p>
+        </article>
+      </section>
+    </main>
+
+    <script src="/assets/js/editor.js"></script>
+  </body>
+</html>
