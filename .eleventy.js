@@ -59,8 +59,8 @@ module.exports = function (eleventyConfig) {
     const figures = items
       .filter(Boolean)
       .map((item) => {
-        const [src, alt = "", caption = ""] = String(item).split("|");
-        return `<figure><img src="${withBasePath(src)}" alt="${alt}" loading="lazy">${caption ? `<figcaption>${caption}</figcaption>` : ""}</figure>`;
+        const [src, alt = ""] = String(item).split("|");
+        return `<figure><img src="${withBasePath(src)}" alt="${alt}" loading="lazy"></figure>`;
       })
       .join("");
 

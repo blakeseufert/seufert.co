@@ -429,11 +429,11 @@ function parseGalleryShortcode(value) {
   const quotedValue = /"((?:\\.|[^"\\])*)"/g;
   let item;
   while ((item = quotedValue.exec(match[1]))) {
-    const [src = "", alt = "", caption = ""] = item[1]
+    const [src = "", alt = ""] = item[1]
       .replace(/\\"/g, '"')
       .replace(/\\\\/g, "\\")
       .split("|");
-    if (src.trim()) items.push({ src: src.trim(), alt: alt.trim(), caption: caption.trim() });
+    if (src.trim()) items.push({ src: src.trim(), alt: alt.trim() });
   }
 
   return items.length ? items : null;
@@ -443,20 +443,14 @@ function galleryId() {
   return `gallery-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
-function galleryItemHtml({ src = "", alt = "", caption = "" }, displaySrc = "") {
+function galleryItemHtml({ src = "", alt = "" }, displaySrc = "") {
   const safeSrc = escapeHtml(src);
   const safeAlt = escapeHtml(alt);
-  const safeCaption = escapeHtml(caption);
 
   return `
     <figure class="editor-gallery__item" data-gallery-item>
       <img src="${escapeHtml(displaySrc || publicUrl(src))}" alt="${safeAlt}" data-md-src="${safeSrc}">
-      <div class="editor-gallery__fields">
-        <label>Alt <input data-gallery-alt type="text" value="${safeAlt}" placeholder="Describe the image"></label>
-        <label>Caption <input data-gallery-caption type="text" value="${safeCaption}" placeholder="Optional caption"></label>
-      </div>
       <div class="editor-gallery__actions">
-        <button class="pill pill--button" data-gallery-action="remove-caption" type="button">Remove caption</button>
         <button class="pill pill--button" data-gallery-action="remove-item" type="button">Remove image</button>
       </div>
     </figure>`;
@@ -482,6 +476,17 @@ function appendGalleryImage(gallery, dataUrl, publicPath) {
 
 function handleGalleryAction(event) {
   const action = event.target.closest("[data-gallery-action]");
+  const selectedItem = event.target.closest("[data-gallery-item]");
+
+  if (!action && selectedItem && event.target.tagName === "IMG") {
+    selectedItem
+      .closest(".editor-gallery")
+      ?.querySelectorAll("[data-gallery-item].editor-gallery__item--selected")
+      .forEach((item) => item.classList.remove("editor-gallery__item--selected"));
+    selectedItem.classList.add("editor-gallery__item--selected");
+    return;
+  }
+
   if (!action) return;
 
   event.preventDefault();
@@ -493,11 +498,6 @@ function handleGalleryAction(event) {
     uploadTarget = "gallery";
     els.imageInput.click();
     return;
-  }
-
-  if (action.dataset.galleryAction === "remove-caption" && item) {
-    const caption = item.querySelector("[data-gallery-caption]");
-    if (caption) caption.value = "";
   }
 
   if (action.dataset.galleryAction === "remove-item" && item) {
@@ -751,13 +751,10 @@ function galleryMarkdown(node) {
     .map((item) => {
       const image = item.querySelector("img");
       const src = image?.dataset.mdSrc || "";
-      const alt = item.querySelector("[data-gallery-alt]")?.value || image?.alt || "";
-      const caption = item.querySelector("[data-gallery-caption]")?.value || "";
+      const alt = image?.alt || "";
       if (!src) return "";
 
-      const fields = [src, alt];
-      if (caption.trim()) fields.push(caption);
-      return `"${fields.map(galleryField).join("|")}"`;
+      return `"${[src, alt].map(galleryField).join("|")}"`;
     })
     .filter(Boolean);
 
@@ -1189,6 +1186,12 @@ document.addEventListener("selectionchange", updateToolbarState);
 document.addEventListener("click", (event) => {
   if (event.target.closest(".post-list__actions")) return;
   document.querySelectorAll(".post-list__actions[open]").forEach((menu) => menu.removeAttribute("open"));
+
+  if (!event.target.closest(".editor-gallery")) {
+    document
+      .querySelectorAll(".editor-gallery__item--selected")
+      .forEach((item) => item.classList.remove("editor-gallery__item--selected"));
+  }
 });
 
 loadConfig();
