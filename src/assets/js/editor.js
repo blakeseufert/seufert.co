@@ -927,7 +927,6 @@ async function loadSelectedPost(path) {
   setCoverPreview(post.data.cover ? publicUrl(post.data.cover) : "", post.data.cover || "");
   els.editor.innerHTML = markdownToEditorHtml(post.body);
   setCleanState();
-  setStatus(`Editing ${post.name}.`);
 }
 
 async function fetchPost(path) {
