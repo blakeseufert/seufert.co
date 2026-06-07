@@ -82,7 +82,7 @@ textarea {
   align-items: center;
   display: grid;
   gap: clamp(36px, 7vw, 86px);
-  grid-template-columns: minmax(190px, 250px) minmax(0, 760px);
+  grid-template-columns: minmax(190px, 250px) minmax(0, 770px);
   justify-content: center;
   margin: 0 auto;
   max-width: 1160px;
@@ -181,7 +181,7 @@ button.pill {
 .site-shell {
   display: grid;
   gap: clamp(36px, 7vw, 86px);
-  grid-template-columns: minmax(190px, 250px) minmax(0, 760px);
+  grid-template-columns: minmax(190px, 250px) minmax(0, 770px);
   justify-content: center;
   margin: 0 auto;
   max-width: 1160px;
@@ -599,7 +599,7 @@ figcaption {
   .topbar {
     align-items: center;
     gap: clamp(56px, 7vw, 96px);
-    grid-template-columns: 254px minmax(0, 771px);
+    grid-template-columns: 254px minmax(0, 770px);
     height: auto;
     max-width: 1167px;
     padding: 34px 24px 0;
@@ -644,7 +644,7 @@ figcaption {
 
   .site-shell {
     gap: clamp(56px, 7vw, 96px);
-    grid-template-columns: 254px minmax(0, 771px);
+    grid-template-columns: 254px minmax(0, 770px);
     max-width: 1167px;
     padding: 228px 24px 0;
     width: 100%;
@@ -854,7 +854,7 @@ figcaption {
   }
 
   .article-layout {
-    max-width: 771px;
+    max-width: 770px;
     width: 100%;
   }
 
@@ -867,11 +867,11 @@ figcaption {
   .article-hero h1 {
     font-size: 4.25rem;
     line-height: 1.11;
-    max-width: 771px;
+    max-width: 770px;
   }
 
   .article-cover {
-    aspect-ratio: 771 / 434;
+    aspect-ratio: 770 / 434;
     border-radius: var(--radius-soft-corner);
     box-shadow: none;
     margin-top: 33px;
@@ -899,7 +899,7 @@ figcaption {
     color: var(--ink);
     font-size: 1.125rem;
     line-height: 2rem;
-    max-width: 771px;
+    max-width: 770px;
   }
 
   .post-body p {
@@ -930,7 +930,7 @@ figcaption {
   .more-posts {
     gap: 1.3rem;
     margin-top: 9rem;
-    max-width: 771px;
+    max-width: 770px;
   }
 
   .more-post {
