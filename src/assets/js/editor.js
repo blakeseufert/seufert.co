@@ -24,6 +24,7 @@ const els = {
   coverImageInput: document.querySelector("#coverImageInput"),
   coverButtonText: document.querySelector("#coverButtonText"),
   coverPreview: document.querySelector("#coverPreview"),
+  imageButton: document.querySelector("#imageButton"),
   imageInput: document.querySelector("#imageInput"),
   dirtyState: document.querySelector("#dirtyState"),
   status: document.querySelector("#statusLine"),
@@ -41,6 +42,7 @@ let currentPost = null;
 let signedInUser = null;
 let uploadTarget = "inline";
 let activeGallery = null;
+let activeImageForGallery = null;
 let lastCleanSnapshot = "";
 let isDirty = false;
 
@@ -646,6 +648,11 @@ function selectedImageBlock() {
   return els.editor.querySelector(".editor-image--selected");
 }
 
+function rememberSelectedImageForUpload() {
+  const selectedImage = selectedImageBlock();
+  activeImageForGallery = selectedImage && els.editor.contains(selectedImage) ? selectedImage : null;
+}
+
 function imageBlockItem(imageBlock) {
   const image = imageBlock.querySelector("img");
   return {
@@ -677,10 +684,15 @@ function convertImageToGallery(imageBlock, dataUrl, publicPath) {
 
 function insertInlineImage(dataUrl, publicPath) {
   const html = `${imageEditorHtml({ src: publicPath }, dataUrl)}<p><br></p>`;
-  const selectedImage = selectedImageBlock();
+  const selectedImage = activeImageForGallery && els.editor.contains(activeImageForGallery)
+    ? activeImageForGallery
+    : selectedImageBlock();
 
   if (selectedImage) {
-    if (convertImageToGallery(selectedImage, dataUrl, publicPath)) return;
+    if (convertImageToGallery(selectedImage, dataUrl, publicPath)) {
+      activeImageForGallery = null;
+      return;
+    }
   }
 
   els.editor.focus();
@@ -714,6 +726,7 @@ async function handleImageUpload(event) {
   event.target.value = "";
   uploadTarget = "inline";
   activeGallery = null;
+  activeImageForGallery = null;
 }
 
 function inlineMarkdown(node) {
@@ -738,7 +751,7 @@ function imageEditorHtml({ src = "", alt = "", layout = "left" }, displaySrc = "
       <img src="${escapeHtml(displaySrc || publicUrl(src))}" alt="${escapeHtml(alt)}" data-md-src="${escapeHtml(src)}">
       <div class="editor-image__actions">
         <button class="pill pill--button" data-image-action="toggle-layout" type="button">${toggleLabel}</button>
-        <button class="pill pill--button" data-image-action="add-to-gallery" type="button">Add to gallery</button>
+        <label class="pill pill--button">Add to gallery <input data-image-gallery-file type="file" accept="image/*" hidden></label>
         <button class="pill pill--button" data-image-action="remove-image" type="button">Remove image</button>
       </div>
     </figure>`;
@@ -800,18 +813,21 @@ function handleImageAction(event) {
     setImageLayout(imageBlock, nextLayout);
   }
 
-  if (action.dataset.imageAction === "add-to-gallery") {
-    uploadTarget = "inline";
-    els.imageInput.click();
-    return;
-  }
-
   if (action.dataset.imageAction === "remove-image") {
+    if (activeImageForGallery === imageBlock) activeImageForGallery = null;
     imageBlock.remove();
     if (!els.editor.children.length) els.editor.innerHTML = "<p><br></p>";
   }
 
   checkDirtyState();
+}
+
+function handleEditorImageUpload(event) {
+  if (!event.target.matches("[data-image-gallery-file]")) return;
+
+  activeImageForGallery = event.target.closest(".editor-image");
+  uploadTarget = "inline";
+  handleImageUpload(event).catch((error) => setStatus(error.message));
 }
 
 function blockMarkdown(node) {
@@ -1283,6 +1299,7 @@ els.postList.addEventListener("click", (event) => {
 els.editor.addEventListener("keyup", handleMarkdownShortcut);
 els.editor.addEventListener("click", handleGalleryAction);
 els.editor.addEventListener("click", handleImageAction);
+els.editor.addEventListener("change", handleEditorImageUpload);
 els.editor.addEventListener("input", () => {
   checkDirtyState();
   updateToolbarState();
@@ -1293,6 +1310,9 @@ els.date.addEventListener("input", checkDirtyState);
 els.coverImageInput.addEventListener("change", (event) => {
   uploadTarget = "cover";
   handleImageUpload(event).catch((error) => setStatus(error.message));
+});
+els.imageButton.addEventListener("pointerdown", () => {
+  if (uploadTarget !== "gallery") rememberSelectedImageForUpload();
 });
 els.imageInput.addEventListener("change", (event) => {
   if (uploadTarget !== "gallery") uploadTarget = "inline";
