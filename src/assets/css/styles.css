@@ -386,6 +386,34 @@ button.pill {
   justify-content: space-between;
 }
 
+.share-menu {
+  position: relative;
+}
+
+.share-menu__panel {
+  align-items: end;
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius);
+  box-shadow: 0 18px 40px rgba(74, 52, 42, 0.12);
+  display: grid;
+  gap: 0.35rem;
+  justify-items: end;
+  padding: 0.5rem;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.5rem);
+  z-index: 12;
+}
+
+.share-menu__panel[hidden] {
+  display: none;
+}
+
+.share-option {
+  justify-content: center;
+}
+
 .post-body {
   font-family: var(--font-body);
   font-size: clamp(1.04rem, 1.45vw, 1.18rem);
@@ -919,6 +947,10 @@ figcaption {
     min-height: 20px;
     padding: 0 0.42rem;
     width: 64px;
+  }
+
+  .article-meta .share-option {
+    width: max-content;
   }
 
   .post-body {

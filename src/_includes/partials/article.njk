@@ -58,10 +58,18 @@
       {% endif %}
       <div class="article-meta">
         <time datetime="{{ postDate | isoDate }}">{{ postDate | readableDate }}</time>
-        <button class="pill pill--button article-share" type="button" onclick="navigator.share ? navigator.share({ title: document.title, url: location.href }) : navigator.clipboard.writeText(location.href)">
-          <svg class="pill__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 12.5 15.5 16.5"/><path d="M15.5 7.5 8.5 11.5"/><circle cx="6.5" cy="12" r="2"/><circle cx="17.5" cy="6.5" r="2"/><circle cx="17.5" cy="17.5" r="2"/></svg>
-          <span>Share</span>
-        </button>
+        <div class="share-menu" data-share-menu data-github-url="{{ site.githubRepo }}">
+          <button class="pill pill--button article-share" type="button" aria-expanded="false" data-share-toggle>
+            <svg class="pill__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 12.5 15.5 16.5"/><path d="M15.5 7.5 8.5 11.5"/><circle cx="6.5" cy="12" r="2"/><circle cx="17.5" cy="6.5" r="2"/><circle cx="17.5" cy="17.5" r="2"/></svg>
+            <span>Share</span>
+          </button>
+          <div class="share-menu__panel" hidden data-share-panel>
+            <a class="pill pill--small share-option" href="#" target="_blank" rel="noopener" data-share-target="twitter">Twitter</a>
+            <a class="pill pill--small share-option" href="#" data-share-target="email">Email</a>
+            <a class="pill pill--small share-option" href="#" target="_blank" rel="noopener" data-share-target="linkedin">LinkedIn</a>
+            <a class="pill pill--small share-option" href="{{ site.githubRepo }}" target="_blank" rel="noopener" data-share-target="github">Star on GitHub</a>
+          </div>
+        </div>
       </div>
     </header>
 
