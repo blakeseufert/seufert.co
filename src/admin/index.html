@@ -33,6 +33,18 @@ permalink: /editor/
         <p>Connect a GitHub token to create, edit, and delete posts in the site repository.</p>
         <label>GitHub token <input id="tokenInput" type="password" autocomplete="off" placeholder="github_pat_..."></label>
         <button class="pill pill--button" id="authButton" type="button">Connect token</button>
+        <details class="auth-help">
+          <summary>Token setup</summary>
+          <ol>
+            <li>Open <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noreferrer">New fine-grained token</a>.</li>
+            <li>Token name: <strong>seufert.co editor</strong>. Expiration: choose the longest option you are comfortable with.</li>
+            <li>Resource owner: <strong>blakeseufert</strong>. Repository access: <strong>Only select repositories</strong>, then choose <strong>seufert.co</strong>.</li>
+            <li>Repository permissions: set <strong>Contents</strong> to <strong>Read and write</strong>. Leave everything else at the default; <strong>Metadata</strong> stays read-only automatically.</li>
+            <li>Generate the token, paste it here, and connect. GitHub only shows the token once.</li>
+          </ol>
+          <p>The editor stores the token only in this browser until you sign out. If it expires or is lost, create a new one from <a href="https://github.com/settings/personal-access-tokens" target="_blank" rel="noreferrer">Personal access tokens</a>.</p>
+          <p>Shortcut: open <code>/editor/#token=github_pat_...</code> once. The editor saves it locally and removes it from the URL.</p>
+        </details>
         <p class="status-line" id="statusLine"></p>
       </section>
     </main>

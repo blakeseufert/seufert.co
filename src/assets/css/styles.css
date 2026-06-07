@@ -972,6 +972,50 @@ figcaption {
   margin: 0;
 }
 
+.auth-help {
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.45;
+  margin-top: 0.25rem;
+  padding-top: 0.75rem;
+}
+
+.auth-help summary {
+  color: var(--ink);
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 0.84rem;
+  font-weight: 800;
+}
+
+.auth-help ol {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0.75rem 0;
+  padding-left: 1.15rem;
+}
+
+.auth-help li::marker {
+  color: var(--accent);
+  font-weight: 800;
+}
+
+.auth-help a {
+  color: var(--link);
+  font-weight: 800;
+  text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+  text-underline-offset: 0.16em;
+}
+
+.auth-help code {
+  background: rgba(151, 122, 111, 0.12);
+  border-radius: 4px;
+  color: var(--ink);
+  font-size: 0.72rem;
+  padding: 0.08rem 0.22rem;
+}
+
 .editor-user {
   color: var(--muted);
   font-size: 0.72rem;
