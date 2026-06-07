@@ -81,10 +81,11 @@ textarea {
 .topbar {
   align-items: center;
   display: grid;
-  gap: 1rem;
-  grid-template-columns: 1fr auto 1fr;
+  gap: clamp(36px, 7vw, 86px);
+  grid-template-columns: minmax(190px, 250px) minmax(0, 760px);
+  justify-content: center;
   margin: 0 auto;
-  max-width: 1120px;
+  max-width: 1160px;
   padding: 34px 24px 12px;
 }
 
@@ -596,25 +597,23 @@ figcaption {
 @media (min-width: 861px) {
   .topbar {
     align-items: center;
+    gap: clamp(56px, 7vw, 96px);
+    grid-template-columns: 254px minmax(0, 771px);
     height: auto;
-    max-width: 860px;
+    max-width: 1167px;
     padding: 34px 24px 0;
     position: relative;
+    width: 100%;
   }
 
   .topbar::after {
     content: none;
   }
 
-  .topbar .icon-links {
-    gap: 0.5rem;
-    grid-column: 1;
-    justify-self: start;
-  }
-
   .site-mark {
     color: var(--muted);
     grid-column: 2;
+    justify-self: start;
   }
 
   .icon-link {
@@ -648,6 +647,11 @@ figcaption {
     padding-top: 0;
     text-align: right;
     top: 24px;
+  }
+
+  .profile-panel__social {
+    justify-content: flex-end;
+    margin-bottom: 164px;
   }
 
   .profile-panel__portrait {
@@ -1423,8 +1427,15 @@ figcaption {
   .profile-panel__tagline,
   .profile-panel__bio,
   .profile-panel__more,
-  .profile-panel__made {
+  .profile-panel__made,
+  .profile-panel__social {
     grid-column: 2;
+  }
+
+  .profile-panel__social {
+    justify-content: flex-start;
+    margin-bottom: 0;
+    order: -1;
   }
 
   .profile-panel__tagline,
