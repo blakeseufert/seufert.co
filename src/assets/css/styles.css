@@ -114,9 +114,35 @@ textarea {
   font-weight: 800;
   height: 1.35rem;
   justify-content: center;
+  position: relative;
   text-decoration: none;
   text-transform: uppercase;
   width: 1.35rem;
+}
+
+.social-pill {
+  box-shadow: 0 10px 28px rgba(74, 52, 42, 0.12);
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  left: 50%;
+  text-transform: none;
+  top: calc(100% + 0.45rem);
+  transform: translate(-50%, -0.2rem);
+  transition: opacity 160ms ease, transform 160ms ease;
+  z-index: 10;
+}
+
+.icon-link .social-pill .pill__icon {
+  flex: 0 0 auto;
+  height: 0.72rem;
+  width: 0.72rem;
+}
+
+.icon-link:hover .social-pill,
+.icon-link:focus-visible .social-pill {
+  opacity: 1;
+  transform: translate(-50%, 0);
 }
 
 .topbar > .pill {
