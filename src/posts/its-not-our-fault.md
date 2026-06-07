@@ -2,14 +2,12 @@
 layout: layouts/post.njk
 title: "It's Not Our Fault, But It Is Our Problem"
 date: 2026-05-28
-excerpt: "Vendor risk, cloud systems, and the gap between responsibility on paper and responsibility in practice."
+excerpt: "Full width Remove image The recent Canvas LMS breach puts front and centre an uncomfortable truth about IT in education: we do not actually control our school's data. We talk exten"
 cover: "/assets/uploads/article-office.webp"
-coverAlt: "Illustrated office with a smoking server and an unavailable service screen"
-tags:
-  - posts
-  - Systems
-  - Risk
+coverAlt: "It's Not Our Fault, But It Is Our Problem"
 ---
+
+![](/assets/uploads/its-not-our-fault-days_gone_by.jpg)
 
 The recent Canvas LMS breach puts front and centre an uncomfortable truth about IT in education: we do not actually control our school's data. We talk extensively about creating secure private and secure boundaries within our schools, but the reality is that the vast majority of our data risk is completely outsourced to third-party vendors.
 
@@ -35,7 +33,7 @@ We have a habit of absolving ourselves of blame when things go wrong. The defaul
 
 Look no further than the irony of the historic CrowdStrike outage that crippled global infrastructure. Instead of being abandoned by the market, the company was rapidly named a leader in endpoint protection and continued selling into enterprise. Consumers and organisations fall victim to status quo bias because switching vendors is slow, risky, and politically expensive.
 
-{% pullquote "Blake Seufert" %}
+{% pullquote %}
 The network we inherit is not the network we have to keep.
 {% endpullquote %}
 
@@ -43,11 +41,11 @@ The network we inherit is not the network we have to keep.
 
 It comes down to a fundamental shift in mindset. Instead of throwing our hands up, every technical issue needs to be reframed: it may not be our fault, but what role can we play to be part of the solution?
 
-{% gallery "/assets/uploads/article-office.webp|A classroom-adjacent systems failure|When one link breaks, the user sees one system.", "/assets/uploads/chromebook-thumb.png|Chromebook detail|Hardware is visible; vendor risk often is not." %}
+{% gallery "/assets/uploads/article-office.webp|A classroom-adjacent systems failure", "/assets/uploads/chromebook-thumb.png|Chromebook detail" %}
 
 When evaluating a vendor, we have to own the consequences of that choice. If a platform erodes confidence through spotty updates, poor data practices, or security scares, the status quo is not neutral.
 
-{% quietquote "Working note" %}
+{% quietquote %}
 Good digital operations are built from boring rituals: ownership, review, logging, testing, and fast public communication.
 {% endquietquote %}
 
