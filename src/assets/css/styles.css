@@ -165,6 +165,10 @@ textarea {
   cursor: pointer;
 }
 
+.pill--danger {
+  color: #a64758;
+}
+
 button.pill {
   appearance: none;
   font-family: var(--font-sans);
@@ -924,6 +928,41 @@ figcaption {
   padding: 38px 24px 72px;
 }
 
+.auth-shell {
+  display: grid;
+  margin: 0 auto;
+  max-width: 520px;
+  min-height: calc(100vh - 80px);
+  padding: clamp(48px, 12vw, 140px) 24px 72px;
+  place-items: start stretch;
+}
+
+.auth-card p {
+  color: var(--muted);
+  margin: 0;
+}
+
+.auth-settings {
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 0.85rem;
+  padding-top: 0.85rem;
+}
+
+.auth-settings summary {
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.editor-user {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  justify-self: end;
+}
+
 .editor-panel,
 .editor-canvas {
   background: var(--paper);
@@ -953,6 +992,7 @@ figcaption {
 }
 
 .editor-panel input,
+.editor-panel select,
 .editor-panel textarea {
   background: #fff;
   border: 1px solid var(--line);

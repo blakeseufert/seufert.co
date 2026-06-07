@@ -70,9 +70,11 @@ Quieter boxed quote.
 
 ## Editor
 
-The editor is available at `/editor/`. It is fully client-side and can save markdown and uploaded images through the GitHub contents API.
+The editor is available at `/editor/`. It is fully client-side and reads/writes markdown through the GitHub Contents API.
 
-Create a GitHub OAuth app, enable device flow, then enter the owner, repo, branch, and client ID in the editor. Uploaded images are saved to `src/assets/uploads/`; posts are saved to `src/posts/`.
+When a valid GitHub token is not active in the browser session, the editor shows only a GitHub sign-in gate. After sign-in it lists every markdown file in the configured posts directory, loads existing posts for editing, overwrites the same file on save, supports renaming by changing the slug, and can delete posts.
+
+Create a GitHub OAuth app, enable device flow, then save the owner, repo, branch, posts directory, and client ID once under Connection settings. Uploaded images are saved to `src/assets/uploads/`; posts are saved to `src/posts/` by default.
 
 ## Design Standards
 

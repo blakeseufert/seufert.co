@@ -3,12 +3,20 @@ const tokenKey = "seufert-editor-token";
 const pendingImages = [];
 
 const els = {
+  authGate: document.querySelector("#authGate"),
+  editorApp: document.querySelector("#editorApp"),
   authButton: document.querySelector("#authButton"),
+  signOutButton: document.querySelector("#signOutButton"),
   saveConfigButton: document.querySelector("#saveConfigButton"),
   savePostButton: document.querySelector("#savePostButton"),
+  refreshPostsButton: document.querySelector("#refreshPostsButton"),
+  newPostButton: document.querySelector("#newPostButton"),
+  deletePostButton: document.querySelector("#deletePostButton"),
   imageInput: document.querySelector("#imageInput"),
   status: document.querySelector("#statusLine"),
+  editorUser: document.querySelector("#editorUser"),
   editor: document.querySelector("#editorCanvas"),
+  postSelect: document.querySelector("#postSelect"),
   title: document.querySelector("#titleInput"),
   slug: document.querySelector("#slugInput"),
   date: document.querySelector("#dateInput"),
@@ -18,11 +26,16 @@ const els = {
   owner: document.querySelector("#ownerInput"),
   repo: document.querySelector("#repoInput"),
   branch: document.querySelector("#branchInput"),
+  postsDir: document.querySelector("#postsDirInput"),
   client: document.querySelector("#clientInput")
 };
 
 const encoder = new TextEncoder();
+const decoder = new TextDecoder();
 let slugWasEdited = false;
+let posts = [];
+let currentPost = null;
+let signedInUser = null;
 
 function setStatus(message) {
   els.status.textContent = message;
@@ -47,18 +60,29 @@ function base64FromText(value) {
   return btoa(binary);
 }
 
+function textFromBase64(value) {
+  const binary = atob(String(value).replace(/\s/g, ""));
+  const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+  return decoder.decode(bytes);
+}
+
+function normalizeDir(value) {
+  return String(value || "src/posts").trim().replace(/^\/+|\/+$/g, "") || "src/posts";
+}
+
 function getConfig() {
   return {
     owner: els.owner.value.trim(),
     repo: els.repo.value.trim(),
     branch: els.branch.value.trim() || "main",
+    postsDir: normalizeDir(els.postsDir.value),
     clientId: els.client.value.trim()
   };
 }
 
 function saveConfig() {
   localStorage.setItem(storageKey, JSON.stringify(getConfig()));
-  setStatus("Config saved.");
+  setStatus("Settings saved.");
 }
 
 function loadConfig() {
@@ -69,20 +93,17 @@ function loadConfig() {
     els.owner.value = config.owner || els.owner.value || "";
     els.repo.value = config.repo || els.repo.value || "";
     els.branch.value = config.branch || els.branch.value || "main";
+    els.postsDir.value = config.postsDir || els.postsDir.value || "src/posts";
     els.client.value = config.clientId || "";
   } catch {
-    setStatus("Config could not be loaded.");
-  }
-
-  if (localStorage.getItem(tokenKey)) {
-    els.authButton.textContent = "Connected";
+    setStatus("Settings could not be loaded.");
   }
 }
 
 function githubHeaders() {
   const token = localStorage.getItem(tokenKey);
   if (!token) {
-    throw new Error("Connect GitHub first.");
+    throw new Error("Sign in with GitHub first.");
   }
 
   return {
@@ -99,22 +120,14 @@ function apiPath(path) {
     .join("/");
 }
 
-async function githubRequest(path, options = {}) {
-  const config = getConfig();
-  if (!config.owner || !config.repo) {
-    throw new Error("Add repository owner and repo.");
-  }
-
-  const response = await fetch(
-    `https://api.github.com/repos/${config.owner}/${config.repo}/${path}`,
-    {
-      ...options,
-      headers: {
-        ...githubHeaders(),
-        ...(options.headers || {})
-      }
+async function githubApi(url, options = {}) {
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      ...githubHeaders(),
+      ...(options.headers || {})
     }
-  );
+  });
 
   if (!response.ok && response.status !== 404) {
     const body = await response.json().catch(() => ({}));
@@ -122,6 +135,15 @@ async function githubRequest(path, options = {}) {
   }
 
   return response;
+}
+
+async function githubRequest(path, options = {}) {
+  const config = getConfig();
+  if (!config.owner || !config.repo) {
+    throw new Error("Add repository owner and repo.");
+  }
+
+  return githubApi(`https://api.github.com/repos/${config.owner}/${config.repo}/${path}`, options);
 }
 
 async function putFile(repoPath, base64Content, message) {
@@ -152,12 +174,71 @@ async function putFile(repoPath, base64Content, message) {
     const body = await response.json().catch(() => ({}));
     throw new Error(body.message || "GitHub save failed.");
   }
+
+  return response.json();
+}
+
+async function deleteFile(repoPath, sha, message) {
+  const config = getConfig();
+  const response = await githubRequest(`contents/${apiPath(repoPath)}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      message,
+      branch: config.branch,
+      sha
+    })
+  });
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.message || "GitHub delete failed.");
+  }
+}
+
+async function validateSession() {
+  const token = localStorage.getItem(tokenKey);
+  if (!token) {
+    showAuthGate();
+    return;
+  }
+
+  try {
+    const response = await githubApi("https://api.github.com/user");
+    if (!response.ok) throw new Error("GitHub token is no longer valid.");
+    signedInUser = await response.json();
+    showEditor();
+    await loadPostList();
+  } catch (error) {
+    localStorage.removeItem(tokenKey);
+    signedInUser = null;
+    showAuthGate();
+    setStatus(error.message || "Please sign in again.");
+  }
+}
+
+function showAuthGate() {
+  els.authGate.hidden = false;
+  els.editorApp.hidden = true;
+  els.editorUser.hidden = true;
+  els.authButton.textContent = "Sign in with GitHub";
+}
+
+function showEditor() {
+  els.authGate.hidden = true;
+  els.editorApp.hidden = false;
+  els.editorUser.hidden = false;
+  els.editorUser.textContent = signedInUser ? `Signed in as ${signedInUser.login}` : "";
+  setStatus("");
 }
 
 async function startDeviceAuth() {
   const { clientId } = getConfig();
   if (!clientId) {
-    setStatus("Add an OAuth client ID first.");
+    document.querySelector(".auth-settings")?.setAttribute("open", "");
+    setStatus("Add the GitHub OAuth client ID once in Connection settings.");
     return;
   }
 
@@ -185,7 +266,7 @@ async function startDeviceAuth() {
   setStatus(`Enter ${device.user_code} in the GitHub tab.`);
 
   const startedAt = Date.now();
-  const intervalMs = (device.interval || 5) * 1000;
+  let intervalMs = (device.interval || 5) * 1000;
 
   while (Date.now() - startedAt < device.expires_in * 1000) {
     await new Promise((resolve) => setTimeout(resolve, intervalMs));
@@ -206,17 +287,29 @@ async function startDeviceAuth() {
     const tokenData = await tokenResponse.json();
     if (tokenData.access_token) {
       localStorage.setItem(tokenKey, tokenData.access_token);
-      els.authButton.textContent = "Connected";
+      await validateSession();
       setStatus("GitHub connected.");
       return;
     }
 
-    if (tokenData.error && tokenData.error !== "authorization_pending") {
+    if (tokenData.error === "slow_down") {
+      intervalMs += 5000;
+    } else if (tokenData.error && tokenData.error !== "authorization_pending") {
       throw new Error(tokenData.error_description || tokenData.error);
     }
   }
 
   throw new Error("GitHub code expired.");
+}
+
+function signOut() {
+  localStorage.removeItem(tokenKey);
+  signedInUser = null;
+  posts = [];
+  currentPost = null;
+  renderPostList();
+  showAuthGate();
+  setStatus("Signed out.");
 }
 
 function selectedText() {
@@ -242,7 +335,7 @@ function runCommand(command) {
     document.execCommand(
       "insertHTML",
       false,
-      `<blockquote class="quote quote--pull"><p>${text}</p></blockquote><p><br></p>`
+      `<blockquote class="quote quote--pull"><p>${escapeHtml(text)}</p></blockquote><p><br></p>`
     );
   }
   if (command === "embed") {
@@ -272,6 +365,13 @@ function escapeHtml(value) {
     .replace(/"/g, "&quot;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
+}
+
+function inlineHtml(value) {
+  return escapeHtml(value)
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/_([^_]+)_/g, "<em>$1</em>")
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
 }
 
 function currentBlock() {
@@ -440,6 +540,42 @@ function yamlString(value) {
   return `"${String(value || "").replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
 }
 
+function yamlValue(value) {
+  return String(value || "")
+    .trim()
+    .replace(/^["']|["']$/g, "");
+}
+
+function parseFrontmatter(markdown) {
+  const match = markdown.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
+  if (!match) return { data: {}, body: markdown };
+
+  const data = {};
+  const tags = [];
+  const lines = match[1].split("\n");
+  let inTags = false;
+
+  lines.forEach((line) => {
+    if (line.trim() === "tags:") {
+      inTags = true;
+      return;
+    }
+
+    if (inTags && line.startsWith("  - ")) {
+      const tag = yamlValue(line.slice(4));
+      if (tag && tag !== "posts") tags.push(tag);
+      return;
+    }
+
+    inTags = false;
+    const pair = line.match(/^([A-Za-z0-9_-]+):\s*(.*)$/);
+    if (pair) data[pair[1]] = yamlValue(pair[2]);
+  });
+
+  data.tags = tags;
+  return { data, body: match[2].trim() };
+}
+
 function frontmatter() {
   const tags = els.tags.value
     .split(",")
@@ -462,6 +598,171 @@ function frontmatter() {
   return lines.join("\n");
 }
 
+function markdownToEditorHtml(markdown) {
+  const blocks = markdown.split(/\n{2,}/).filter((block) => block.trim());
+
+  return blocks.map((block) => {
+    const value = block.trim();
+    const image = value.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+    const youtube = value.match(/^\{%\s*youtube\s+"([^"]+)"(?:,\s*"([^"]+)")?\s*%\}$/);
+    const pullquote = value.match(/^\{%\s*pullquote[^%]*%\}\n?([\s\S]*?)\n?\{%\s*endpullquote\s*%\}$/);
+    const quietquote = value.match(/^\{%\s*quietquote[^%]*%\}\n?([\s\S]*?)\n?\{%\s*endquietquote\s*%\}$/);
+
+    if (youtube) {
+      const title = youtube[2] || "Embedded video";
+      const shortcode = `{% youtube "${youtube[1]}", "${title}" %}`;
+      return `<figure class="media-embed" data-md="${escapeHtml(shortcode)}"><iframe src="https://www.youtube-nocookie.com/embed/${youtube[1]}" title="${escapeHtml(title)}"></iframe><figcaption>${escapeHtml(title)}</figcaption></figure>`;
+    }
+
+    if (pullquote) {
+      return `<blockquote class="quote quote--pull"><p>${inlineHtml(pullquote[1].trim())}</p></blockquote>`;
+    }
+
+    if (quietquote) {
+      return `<blockquote class="quote quote--quiet"><p>${inlineHtml(quietquote[1].trim())}</p></blockquote>`;
+    }
+
+    if (image) {
+      return `<img src="${escapeHtml(image[2])}" alt="${escapeHtml(image[1])}" data-md-src="${escapeHtml(image[2])}">`;
+    }
+
+    if (value.startsWith("### ")) return `<h3>${inlineHtml(value.slice(4))}</h3>`;
+    if (value.startsWith("## ")) return `<h2>${inlineHtml(value.slice(3))}</h2>`;
+    if (value.startsWith("# ")) return `<h1>${inlineHtml(value.slice(2))}</h1>`;
+
+    if (/^- /.test(value)) {
+      const items = value.split("\n").map((line) => line.replace(/^- /, "").trim());
+      return `<ul>${items.map((item) => `<li>${inlineHtml(item)}</li>`).join("")}</ul>`;
+    }
+
+    if (/^\d+\. /.test(value)) {
+      const items = value.split("\n").map((line) => line.replace(/^\d+\. /, "").trim());
+      return `<ol>${items.map((item) => `<li>${inlineHtml(item)}</li>`).join("")}</ol>`;
+    }
+
+    if (value.startsWith("> ")) {
+      const quote = value.split("\n").map((line) => line.replace(/^> ?/, "")).join("\n");
+      return `<blockquote>${inlineHtml(quote)}</blockquote>`;
+    }
+
+    if (value.startsWith("{% gallery") || value.startsWith("<")) {
+      return `<div data-md="${escapeHtml(value)}">${escapeHtml(value)}</div>`;
+    }
+
+    return `<p>${inlineHtml(value)}</p>`;
+  }).join("");
+}
+
+function resetEditor() {
+  currentPost = null;
+  pendingImages.splice(0);
+  slugWasEdited = false;
+  els.title.value = "Untitled note";
+  els.slug.value = "untitled-note";
+  els.date.value = new Date().toISOString().slice(0, 10);
+  els.excerpt.value = "";
+  els.tags.value = "Systems, Notes";
+  els.cover.value = "";
+  els.editor.innerHTML = "<p>Start with a short opening paragraph. The public post layout will automatically apply the drop cap.</p>";
+  els.postSelect.value = "";
+  setStatus("New post ready.");
+}
+
+function postPathFromSlug(slug) {
+  return `${getConfig().postsDir}/${slug}.md`;
+}
+
+function renderPostList() {
+  els.postSelect.innerHTML = "";
+
+  const placeholder = document.createElement("option");
+  placeholder.value = "";
+  placeholder.textContent = posts.length ? "Select a post..." : "No posts found";
+  els.postSelect.append(placeholder);
+
+  posts.forEach((post) => {
+    const option = document.createElement("option");
+    option.value = post.path;
+    option.textContent = `${post.data.date || "No date"} - ${post.data.title || post.name}`;
+    els.postSelect.append(option);
+  });
+
+  if (currentPost) els.postSelect.value = currentPost.path;
+}
+
+async function loadPostList() {
+  saveConfig();
+  setStatus("Loading posts...");
+  const config = getConfig();
+  const response = await githubRequest(`contents/${apiPath(config.postsDir)}?ref=${encodeURIComponent(config.branch)}`);
+
+  if (response.status === 404) {
+    posts = [];
+    renderPostList();
+    setStatus(`No directory found at ${config.postsDir}. Saving will create files there.`);
+    return;
+  }
+
+  const entries = await response.json();
+  const markdownEntries = entries
+    .filter((entry) => entry.type === "file" && entry.name.endsWith(".md"))
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  const loaded = await Promise.all(markdownEntries.map(async (entry) => {
+    const file = await githubRequest(`contents/${apiPath(entry.path)}?ref=${encodeURIComponent(config.branch)}`);
+    const data = await file.json();
+    const markdown = textFromBase64(data.content || "");
+    const parsed = parseFrontmatter(markdown);
+    return {
+      name: entry.name,
+      path: entry.path,
+      sha: data.sha,
+      markdown,
+      data: parsed.data,
+      body: parsed.body
+    };
+  }));
+
+  posts = loaded.sort((a, b) => new Date(b.data.date || 0) - new Date(a.data.date || 0));
+  renderPostList();
+  setStatus(`Loaded ${posts.length} post${posts.length === 1 ? "" : "s"}.`);
+}
+
+async function loadSelectedPost() {
+  const path = els.postSelect.value;
+  if (!path) return;
+
+  let post = posts.find((item) => item.path === path);
+  if (!post) return;
+
+  const config = getConfig();
+  const response = await githubRequest(`contents/${apiPath(path)}?ref=${encodeURIComponent(config.branch)}`);
+  const data = await response.json();
+  const markdown = textFromBase64(data.content || "");
+  const parsed = parseFrontmatter(markdown);
+
+  post = {
+    ...post,
+    sha: data.sha,
+    markdown,
+    data: parsed.data,
+    body: parsed.body
+  };
+
+  currentPost = post;
+  pendingImages.splice(0);
+  slugWasEdited = true;
+  els.title.value = post.data.title || "";
+  els.slug.value = slugify(post.name.replace(/\.md$/, ""));
+  els.date.value = post.data.date || new Date().toISOString().slice(0, 10);
+  els.excerpt.value = post.data.excerpt || "";
+  els.tags.value = (post.data.tags || []).join(", ");
+  els.cover.value = post.data.cover || "";
+  els.editor.innerHTML = markdownToEditorHtml(post.body);
+  els.postSelect.value = post.path;
+  setStatus(`Editing ${post.name}.`);
+}
+
 async function savePost() {
   saveConfig();
   const slug = slugify(els.slug.value);
@@ -474,8 +775,33 @@ async function savePost() {
 
   setStatus("Saving post...");
   const markdown = `${frontmatter()}\n\n${editorMarkdown()}\n`;
-  await putFile(`src/posts/${slug}.md`, base64FromText(markdown), `Publish ${els.title.value}`);
+  const newPath = postPathFromSlug(slug);
+  await putFile(newPath, base64FromText(markdown), `${currentPost ? "Update" : "Publish"} ${els.title.value}`);
+
+  if (currentPost && currentPost.path !== newPath) {
+    await deleteFile(currentPost.path, currentPost.sha, `Remove renamed post ${currentPost.name}`);
+  }
+
+  await loadPostList();
+  currentPost = posts.find((post) => post.path === newPath) || null;
+  renderPostList();
   setStatus("Post saved. GitHub Pages will rebuild on push.");
+}
+
+async function deleteCurrentPost() {
+  if (!currentPost) {
+    setStatus("Select a post to delete.");
+    return;
+  }
+
+  const confirmed = confirm(`Delete "${currentPost.data.title || currentPost.name}" from ${currentPost.path}?`);
+  if (!confirmed) return;
+
+  setStatus("Deleting post...");
+  await deleteFile(currentPost.path, currentPost.sha, `Delete ${currentPost.data.title || currentPost.name}`);
+  resetEditor();
+  await loadPostList();
+  setStatus("Post deleted. GitHub Pages will rebuild on push.");
 }
 
 document.querySelectorAll("[data-command]").forEach((button) => {
@@ -492,10 +818,19 @@ els.slug.addEventListener("input", () => {
   slugWasEdited = true;
 });
 
+els.postSelect.addEventListener("change", () => loadSelectedPost().catch((error) => setStatus(error.message)));
 els.editor.addEventListener("keyup", handleMarkdownShortcut);
-els.imageInput.addEventListener("change", handleImageUpload);
-els.saveConfigButton.addEventListener("click", saveConfig);
+els.imageInput.addEventListener("change", (event) => handleImageUpload(event).catch((error) => setStatus(error.message)));
+els.saveConfigButton.addEventListener("click", () => {
+  saveConfig();
+  if (!els.editorApp.hidden) loadPostList().catch((error) => setStatus(error.message));
+});
 els.savePostButton.addEventListener("click", () => savePost().catch((error) => setStatus(error.message)));
+els.refreshPostsButton.addEventListener("click", () => loadPostList().catch((error) => setStatus(error.message)));
+els.newPostButton.addEventListener("click", resetEditor);
+els.deletePostButton.addEventListener("click", () => deleteCurrentPost().catch((error) => setStatus(error.message)));
+els.signOutButton.addEventListener("click", signOut);
 els.authButton.addEventListener("click", () => startDeviceAuth().catch((error) => setStatus(error.message)));
 
 loadConfig();
+validateSession();
