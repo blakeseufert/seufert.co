@@ -35,7 +35,9 @@ html {
 }
 
 body {
+  background: var(--canvas);
   margin: 0;
+  min-height: 100vh;
   min-width: 320px;
 }
 
@@ -291,6 +293,20 @@ button.pill {
   font-size: 0.75rem;
   margin: 0 auto 0.9rem;
   max-width: 12.5rem;
+}
+
+.profile-panel__made {
+  color: var(--muted);
+  font-family: var(--font-display);
+  font-size: 0.625rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0.65rem auto 0;
+}
+
+.profile-panel__made a {
+  color: #de7582;
+  text-decoration: none;
 }
 
 .article-layout {
@@ -615,7 +631,7 @@ figcaption {
     gap: clamp(56px, 7vw, 96px);
     grid-template-columns: 254px minmax(0, 771px);
     max-width: 1167px;
-    padding: 228px 24px 92px;
+    padding: 228px 24px 0;
     width: 100%;
   }
 
@@ -805,6 +821,20 @@ figcaption {
     font-weight: 700;
     gap: 0.32rem;
     justify-content: flex-end;
+    text-decoration: none;
+  }
+
+  .profile-panel__made {
+    color: #977c70;
+    font-family: var(--font-display);
+    font-size: 0.625rem;
+    font-weight: 700;
+    line-height: 1;
+    margin: 150px 0 0;
+  }
+
+  .profile-panel__made a {
+    color: #de7582;
     text-decoration: none;
   }
 
@@ -1119,7 +1149,8 @@ figcaption {
   .profile-panel__name,
   .profile-panel__tagline,
   .profile-panel__bio,
-  .profile-panel__more {
+  .profile-panel__more,
+  .profile-panel__made {
     grid-column: 2;
   }
 
