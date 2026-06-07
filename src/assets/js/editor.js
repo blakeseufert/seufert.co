@@ -636,7 +636,6 @@ function renderPostList() {
 }
 
 async function loadPostList() {
-  saveConfig();
   setStatus("Loading posts...");
   const config = getConfig();
   const response = await githubRequest(`contents/${apiPath(config.postsDir)}?ref=${encodeURIComponent(config.branch)}`);
@@ -709,7 +708,6 @@ async function loadSelectedPost() {
 }
 
 async function savePost() {
-  saveConfig();
   const slug = slugify(els.slug.value);
   els.slug.value = slug;
 
