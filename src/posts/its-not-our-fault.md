@@ -1,10 +1,10 @@
 ---
 layout: layouts/post.njk
-title: "It's Not Our Fault, But It Is Our Problem"
+title: "It's Not Our Fault, But It Is Our Problem 2"
 date: 2026-05-28
-excerpt: "Full width Remove image The recent Canvas LMS breach puts front and centre an uncomfortable truth about IT in education: we do not actually control our school's data. We talk exten"
+excerpt: "Full width Add to gallery Remove image The recent Canvas LMS breach puts front and centre an uncomfortable truth about IT in education: we do not actually control our school's data"
 cover: "/assets/uploads/article-office.webp"
-coverAlt: "It's Not Our Fault, But It Is Our Problem"
+coverAlt: "It's Not Our Fault, But It Is Our Problem 2"
 ---
 
 ![](/assets/uploads/its-not-our-fault-days_gone_by.jpg)
