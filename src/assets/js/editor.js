@@ -460,7 +460,7 @@ function galleryEditorHtml(items = []) {
   return `
     <section class="editor-gallery" contenteditable="false" data-gallery-id="${galleryId()}">
       <div class="gallery editor-gallery__grid">
-        ${items.map((item) => galleryItemHtml(item)).join("")}
+        ${items.map((item) => galleryItemHtml(item, item.displaySrc)).join("")}
       </div>
       <div class="editor-gallery__controls">
         <button class="pill pill--button" data-gallery-action="add-image" type="button">Add image</button>
@@ -646,15 +646,41 @@ function selectedImageBlock() {
   return els.editor.querySelector(".editor-image--selected");
 }
 
+function imageBlockItem(imageBlock) {
+  const image = imageBlock.querySelector("img");
+  return {
+    src: image?.dataset.mdSrc || "",
+    alt: image?.alt || ""
+  };
+}
+
+function convertImageToGallery(imageBlock, dataUrl, publicPath) {
+  const firstItem = imageBlockItem(imageBlock);
+  if (!firstItem.src) return false;
+
+  imageBlock.insertAdjacentHTML(
+    "beforebegin",
+    galleryEditorHtml([
+      firstItem,
+      {
+        src: publicPath,
+        displaySrc: dataUrl
+      }
+    ])
+  );
+
+  const gallery = imageBlock.previousElementSibling;
+  imageBlock.remove();
+  gallery?.querySelector("[data-gallery-item]:last-child")?.classList.add("editor-gallery__item--selected");
+  return true;
+}
+
 function insertInlineImage(dataUrl, publicPath) {
   const html = `${imageEditorHtml({ src: publicPath }, dataUrl)}<p><br></p>`;
   const selectedImage = selectedImageBlock();
 
   if (selectedImage) {
-    selectedImage.insertAdjacentHTML("afterend", html);
-    selectedImage.classList.remove("editor-image--selected");
-    selectedImage.nextElementSibling?.classList.add("editor-image--selected");
-    return;
+    if (convertImageToGallery(selectedImage, dataUrl, publicPath)) return;
   }
 
   els.editor.focus();
@@ -712,6 +738,7 @@ function imageEditorHtml({ src = "", alt = "", layout = "left" }, displaySrc = "
       <img src="${escapeHtml(displaySrc || publicUrl(src))}" alt="${escapeHtml(alt)}" data-md-src="${escapeHtml(src)}">
       <div class="editor-image__actions">
         <button class="pill pill--button" data-image-action="toggle-layout" type="button">${toggleLabel}</button>
+        <button class="pill pill--button" data-image-action="add-to-gallery" type="button">Add to gallery</button>
         <button class="pill pill--button" data-image-action="remove-image" type="button">Remove image</button>
       </div>
     </figure>`;
@@ -771,6 +798,12 @@ function handleImageAction(event) {
   if (action.dataset.imageAction === "toggle-layout") {
     const nextLayout = imageBlock.dataset.imageLayout === "full" ? "left" : "full";
     setImageLayout(imageBlock, nextLayout);
+  }
+
+  if (action.dataset.imageAction === "add-to-gallery") {
+    uploadTarget = "inline";
+    els.imageInput.click();
+    return;
   }
 
   if (action.dataset.imageAction === "remove-image") {

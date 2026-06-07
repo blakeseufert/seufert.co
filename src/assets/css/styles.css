@@ -1693,8 +1693,10 @@ figcaption {
 
 .editor-image__actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.45rem;
   left: 0.5rem;
+  max-width: calc(100% - 1rem);
   opacity: 0;
   pointer-events: none;
   position: absolute;
