@@ -505,8 +505,15 @@ button.pill {
 }
 
 .post-body a {
-  color: var(--blue);
+  color: inherit;
   font-weight: 700;
+  text-decoration-color: var(--coral);
+  text-decoration-thickness: 0.08em;
+}
+
+.post-body a:hover,
+.post-body a:focus-visible {
+  text-decoration-color: var(--coral);
 }
 
 .post-body img {
