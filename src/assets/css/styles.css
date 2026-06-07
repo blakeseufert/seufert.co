@@ -523,6 +523,18 @@ button.pill {
   margin: 2rem 0;
 }
 
+.image-block {
+  margin: 2rem 0;
+}
+
+.image-block img {
+  margin: 0;
+}
+
+.image-block--full img {
+  width: 100%;
+}
+
 .post-image-zoom {
   cursor: zoom-in;
 }
@@ -1665,6 +1677,49 @@ figcaption {
   justify-content: flex-start;
 }
 
+.editor-image {
+  cursor: pointer;
+  margin: 1rem 0;
+  position: relative;
+}
+
+.editor-image img {
+  margin: 0;
+}
+
+.editor-image--full img {
+  width: 100%;
+}
+
+.editor-image__actions {
+  display: flex;
+  gap: 0.45rem;
+  left: 0.5rem;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  top: 0.5rem;
+  transform: translateY(-0.25rem);
+  transition: opacity 160ms ease, transform 160ms ease;
+  z-index: 2;
+}
+
+.editor-image--selected .editor-image__actions {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.editor-image--selected img {
+  outline: 2px solid color-mix(in srgb, var(--coral) 78%, transparent);
+  outline-offset: 2px;
+}
+
+.editor-image__actions .pill {
+  background: color-mix(in srgb, var(--paper) 94%, transparent);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--ink) 14%, transparent);
+}
+
 .editor-body h1,
 .editor-body h2,
 .editor-body h3 {
@@ -1685,6 +1740,15 @@ figcaption {
   margin: 1rem 0;
   max-height: 420px;
   object-fit: cover;
+}
+
+.editor-body .editor-image img {
+  margin: 0;
+}
+
+.editor-body .editor-image--full img {
+  max-height: none;
+  width: 100%;
 }
 
 .status-line {

@@ -647,7 +647,7 @@ function insertInlineImage(dataUrl, publicPath) {
   document.execCommand(
     "insertHTML",
     false,
-    `<img src="${dataUrl}" alt="" data-md-src="${publicPath}"><p><br></p>`
+    `${imageEditorHtml({ src: publicPath }, dataUrl)}<p><br></p>`
   );
 }
 
@@ -693,11 +693,84 @@ function inlineMarkdown(node) {
   return content;
 }
 
+function imageEditorHtml({ src = "", alt = "", layout = "left" }, displaySrc = "") {
+  const imageLayout = layout === "full" ? "full" : "left";
+  const toggleLabel = imageLayout === "full" ? "Left align" : "Full width";
+
+  return `
+    <figure class="editor-image editor-image--${imageLayout}" contenteditable="false" data-image-layout="${imageLayout}">
+      <img src="${escapeHtml(displaySrc || publicUrl(src))}" alt="${escapeHtml(alt)}" data-md-src="${escapeHtml(src)}">
+      <div class="editor-image__actions">
+        <button class="pill pill--button" data-image-action="toggle-layout" type="button">${toggleLabel}</button>
+      </div>
+    </figure>`;
+}
+
+function parseImageShortcode(value) {
+  const match = String(value || "")
+    .trim()
+    .match(/^\{%\s*image\s+"([^"]+)"(?:,\s*"([^"]*)")?(?:,\s*"([^"]*)")?\s*%\}$/);
+
+  if (!match) return null;
+  return {
+    src: match[1],
+    alt: match[2] || "",
+    layout: match[3] === "full" ? "full" : "left"
+  };
+}
+
+function imageMarkdown(node) {
+  const image = node.querySelector("img");
+  const src = image?.dataset.mdSrc || "";
+  const alt = image?.alt || "";
+  const layout = node.dataset.imageLayout === "full" ? "full" : "left";
+  if (!src) return "";
+
+  if (layout === "full") {
+    return `{% image "${galleryField(src)}", "${galleryField(alt)}", "full" %}`;
+  }
+
+  return `![${alt}](${src})`;
+}
+
+function setImageLayout(node, layout) {
+  const imageLayout = layout === "full" ? "full" : "left";
+  const button = node.querySelector("[data-image-action='toggle-layout']");
+  node.dataset.imageLayout = imageLayout;
+  node.classList.toggle("editor-image--full", imageLayout === "full");
+  node.classList.toggle("editor-image--left", imageLayout !== "full");
+  if (button) button.textContent = imageLayout === "full" ? "Left align" : "Full width";
+}
+
+function handleImageAction(event) {
+  const action = event.target.closest("[data-image-action]");
+  const imageBlock = event.target.closest(".editor-image");
+
+  if (!action && imageBlock && event.target.tagName === "IMG") {
+    els.editor
+      .querySelectorAll(".editor-image--selected")
+      .forEach((item) => item.classList.remove("editor-image--selected"));
+    imageBlock.classList.add("editor-image--selected");
+    return;
+  }
+
+  if (!action || !imageBlock) return;
+
+  event.preventDefault();
+  if (action.dataset.imageAction === "toggle-layout") {
+    const nextLayout = imageBlock.dataset.imageLayout === "full" ? "left" : "full";
+    setImageLayout(imageBlock, nextLayout);
+  }
+
+  checkDirtyState();
+}
+
 function blockMarkdown(node) {
   if (node.nodeType !== Node.ELEMENT_NODE) return "";
 
   const text = inlineMarkdown(node).trim();
   if (node.classList.contains("editor-gallery")) return galleryMarkdown(node);
+  if (node.classList.contains("editor-image")) return imageMarkdown(node);
   if (node.dataset.md) return node.dataset.md;
   if (node.tagName === "H1") return `# ${text}`;
   if (node.tagName === "H2") return `## ${text}`;
@@ -846,10 +919,15 @@ function markdownToEditorHtml(markdown) {
   return blocks.map((block) => {
     const value = block.trim();
     const image = value.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+    const imageShortcode = parseImageShortcode(value);
     const youtube = value.match(/^\{%\s*youtube\s+"([^"]+)"(?:,\s*"([^"]+)")?\s*%\}$/);
     const gallery = parseGalleryShortcode(value);
     const pullquote = value.match(/^\{%\s*pullquote[^%]*%\}\n?([\s\S]*?)\n?\{%\s*endpullquote\s*%\}$/);
     const quietquote = value.match(/^\{%\s*quietquote[^%]*%\}\n?([\s\S]*?)\n?\{%\s*endquietquote\s*%\}$/);
+
+    if (imageShortcode) {
+      return imageEditorHtml(imageShortcode);
+    }
 
     if (gallery) {
       return galleryEditorHtml(gallery);
@@ -870,7 +948,7 @@ function markdownToEditorHtml(markdown) {
     }
 
     if (image) {
-      return `<img src="${escapeHtml(publicUrl(image[2]))}" alt="${escapeHtml(image[1])}" data-md-src="${escapeHtml(image[2])}">`;
+      return imageEditorHtml({ src: image[2], alt: image[1] });
     }
 
     if (value.startsWith("### ")) return `<h3>${inlineHtml(value.slice(4))}</h3>`;
@@ -1155,6 +1233,7 @@ els.postList.addEventListener("click", (event) => {
 });
 els.editor.addEventListener("keyup", handleMarkdownShortcut);
 els.editor.addEventListener("click", handleGalleryAction);
+els.editor.addEventListener("click", handleImageAction);
 els.editor.addEventListener("input", () => {
   checkDirtyState();
   updateToolbarState();
@@ -1191,6 +1270,12 @@ document.addEventListener("click", (event) => {
     document
       .querySelectorAll(".editor-gallery__item--selected")
       .forEach((item) => item.classList.remove("editor-gallery__item--selected"));
+  }
+
+  if (!event.target.closest(".editor-image")) {
+    document
+      .querySelectorAll(".editor-image--selected")
+      .forEach((item) => item.classList.remove("editor-image--selected"));
   }
 });
 

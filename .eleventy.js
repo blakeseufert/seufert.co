@@ -55,6 +55,13 @@ module.exports = function (eleventyConfig) {
     return `<figure class="media-embed"><video controls preload="metadata" src="${src}"></video><figcaption>${safeTitle}</figcaption></figure>`;
   });
 
+  eleventyConfig.addShortcode("image", (src, alt = "", layout = "left") => {
+    const safeSrc = withBasePath(src);
+    const safeAlt = String(alt).replace(/"/g, "&quot;");
+    const imageLayout = layout === "full" ? "full" : "left";
+    return `<figure class="image-block image-block--${imageLayout}"><img src="${safeSrc}" alt="${safeAlt}" loading="lazy"></figure>`;
+  });
+
   eleventyConfig.addShortcode("gallery", (...items) => {
     const figures = items
       .filter(Boolean)
