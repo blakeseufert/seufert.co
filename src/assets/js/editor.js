@@ -642,13 +642,23 @@ function coverPath() {
   return els.coverPreview.dataset.mdSrc || firstInlineImagePath() || defaultCoverPath;
 }
 
+function selectedImageBlock() {
+  return els.editor.querySelector(".editor-image--selected");
+}
+
 function insertInlineImage(dataUrl, publicPath) {
+  const html = `${imageEditorHtml({ src: publicPath }, dataUrl)}<p><br></p>`;
+  const selectedImage = selectedImageBlock();
+
+  if (selectedImage) {
+    selectedImage.insertAdjacentHTML("afterend", html);
+    selectedImage.classList.remove("editor-image--selected");
+    selectedImage.nextElementSibling?.classList.add("editor-image--selected");
+    return;
+  }
+
   els.editor.focus();
-  document.execCommand(
-    "insertHTML",
-    false,
-    `${imageEditorHtml({ src: publicPath }, dataUrl)}<p><br></p>`
-  );
+  document.execCommand("insertHTML", false, html);
 }
 
 async function handleImageUpload(event) {
@@ -702,6 +712,7 @@ function imageEditorHtml({ src = "", alt = "", layout = "left" }, displaySrc = "
       <img src="${escapeHtml(displaySrc || publicUrl(src))}" alt="${escapeHtml(alt)}" data-md-src="${escapeHtml(src)}">
       <div class="editor-image__actions">
         <button class="pill pill--button" data-image-action="toggle-layout" type="button">${toggleLabel}</button>
+        <button class="pill pill--button" data-image-action="remove-image" type="button">Remove image</button>
       </div>
     </figure>`;
 }
@@ -760,6 +771,11 @@ function handleImageAction(event) {
   if (action.dataset.imageAction === "toggle-layout") {
     const nextLayout = imageBlock.dataset.imageLayout === "full" ? "left" : "full";
     setImageLayout(imageBlock, nextLayout);
+  }
+
+  if (action.dataset.imageAction === "remove-image") {
+    imageBlock.remove();
+    if (!els.editor.children.length) els.editor.innerHTML = "<p><br></p>";
   }
 
   checkDirtyState();
