@@ -59,21 +59,109 @@ function setupPostImageLightbox() {
   document.body.append(lightbox);
 
   const lightboxImage = lightbox.querySelector("img");
+  let activeImage = null;
+  let isAnimating = false;
+
+  function imageFrame(image) {
+    const rect = image.getBoundingClientRect();
+    return {
+      borderRadius: getComputedStyle(image).borderRadius,
+      height: rect.height,
+      left: rect.left,
+      top: rect.top,
+      width: rect.width
+    };
+  }
+
+  function visibleFrame() {
+    const rect = lightboxImage.getBoundingClientRect();
+    return {
+      borderRadius: getComputedStyle(lightboxImage).borderRadius,
+      height: rect.height,
+      left: rect.left,
+      top: rect.top,
+      width: rect.width
+    };
+  }
+
+  function frameStyles(frame) {
+    return {
+      borderRadius: frame.borderRadius,
+      height: `${frame.height}px`,
+      left: `${frame.left}px`,
+      top: `${frame.top}px`,
+      width: `${frame.width}px`
+    };
+  }
+
+  function lockToFrame(frame) {
+    Object.assign(lightboxImage.style, {
+      maxHeight: "none",
+      maxWidth: "none",
+      objectFit: "cover",
+      position: "fixed",
+      ...frameStyles(frame)
+    });
+  }
+
+  function unlockFrame() {
+    lightboxImage.removeAttribute("style");
+  }
 
   function closeLightbox() {
-    if (lightbox.hidden) return;
+    if (lightbox.hidden || isAnimating) return;
+
+    const destination = activeImage ? imageFrame(activeImage) : null;
+    const start = visibleFrame();
+    isAnimating = true;
+
+    if (destination) {
+      lockToFrame(start);
+      lightbox.classList.add("image-lightbox--closing");
+      lightboxImage.animate([frameStyles(start), frameStyles(destination)], {
+        duration: 230,
+        easing: "cubic-bezier(.2, .8, .2, 1)"
+      }).finished.finally(finishClose);
+    } else {
+      finishClose();
+    }
+  }
+
+  function finishClose() {
     lightbox.hidden = true;
+    lightbox.classList.remove("image-lightbox--closing");
     lightboxImage.removeAttribute("src");
     lightboxImage.alt = "";
+    unlockFrame();
+    activeImage = null;
+    isAnimating = false;
     document.body.classList.remove("image-lightbox-open");
     window.removeEventListener("scroll", closeLightbox);
   }
 
   function openLightbox(image) {
+    if (isAnimating) return;
+    activeImage = image;
+    const start = imageFrame(image);
+
     lightboxImage.src = image.currentSrc || image.src;
     lightboxImage.alt = image.alt || "";
     lightbox.hidden = false;
     document.body.classList.add("image-lightbox-open");
+
+    requestAnimationFrame(() => {
+      const destination = visibleFrame();
+      isAnimating = true;
+      lockToFrame(start);
+      lightboxImage.animate([frameStyles(start), frameStyles(destination)], {
+        duration: 250,
+        easing: "cubic-bezier(.2, .8, .2, 1)"
+      }).finished.finally(() => {
+        unlockFrame();
+        isAnimating = false;
+      });
+    });
+
     window.addEventListener("scroll", closeLightbox, { passive: true });
   }
 
