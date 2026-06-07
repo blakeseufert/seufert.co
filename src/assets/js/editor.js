@@ -6,7 +6,8 @@ const editorConfig = {
   repo: document.querySelector('meta[name="github-repo"]')?.content.trim() || "seufert.co",
   branch: document.querySelector('meta[name="github-branch"]')?.content.trim() || "main",
   postsDir: normalizeDir(document.querySelector('meta[name="github-posts-dir"]')?.content || "src/posts"),
-  clientId: document.querySelector('meta[name="github-oauth-client-id"]')?.content.trim() || ""
+  clientId: document.querySelector('meta[name="github-oauth-client-id"]')?.content.trim() || "",
+  oauthProxyUrl: document.querySelector('meta[name="github-oauth-proxy-url"]')?.content.trim().replace(/\/$/, "") || ""
 };
 const siteBasePath = document.querySelector('meta[name="site-base-path"]')?.content.trim() || "/";
 const pendingImages = [];
@@ -235,6 +236,8 @@ function showAuthGate() {
   els.authButton.textContent = "Sign in with GitHub";
   if (!getConfig().clientId) {
     setStatus("GitHub sign-in needs the OAuth client ID in the editor page metadata.");
+  } else if (!getConfig().oauthProxyUrl) {
+    setStatus("GitHub sign-in needs the OAuth bridge URL in the editor page metadata.");
   }
 }
 
@@ -247,17 +250,21 @@ function showEditor() {
 }
 
 async function startDeviceAuth() {
-  const { clientId } = getConfig();
+  const { clientId, oauthProxyUrl } = getConfig();
   if (!clientId) {
     setStatus("GitHub sign-in is not configured yet. Add the OAuth client ID to the editor page metadata.");
     return;
   }
+  if (!oauthProxyUrl) {
+    setStatus("GitHub sign-in needs an OAuth bridge. A static page cannot call GitHub token endpoints directly.");
+    return;
+  }
 
   saveConfig();
-  const authWindow = window.open("", "github-oauth", "popup,width=640,height=760");
+  let authWindow = window.open("", "github-oauth", "popup,width=640,height=760");
   setStatus("Opening GitHub sign-in...");
 
-  const deviceResponse = await fetch("https://github.com/login/device/code", {
+  const deviceResponse = await fetch(`${oauthProxyUrl}/device/code`, {
     method: "POST",
     headers: {
       Accept: "application/json",
@@ -270,6 +277,7 @@ async function startDeviceAuth() {
   });
 
   if (!deviceResponse.ok) {
+    if (authWindow) authWindow.close();
     throw new Error("GitHub did not return a device code.");
   }
 
@@ -289,7 +297,7 @@ async function startDeviceAuth() {
   while (Date.now() - startedAt < device.expires_in * 1000) {
     await new Promise((resolve) => setTimeout(resolve, intervalMs));
 
-    const tokenResponse = await fetch("https://github.com/login/oauth/access_token", {
+    const tokenResponse = await fetch(`${oauthProxyUrl}/access_token`, {
       method: "POST",
       headers: {
         Accept: "application/json",

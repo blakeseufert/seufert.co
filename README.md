@@ -74,7 +74,20 @@ The editor is available at `/editor/`. It is fully client-side and reads/writes 
 
 When a valid GitHub token is not active in the browser session, the editor shows only a GitHub sign-in gate. After sign-in it lists every markdown file in the configured posts directory, loads existing posts for editing, overwrites the same file on save, supports renaming by changing the slug, and can delete posts.
 
-Create a GitHub OAuth app and enable device flow. The editor carries the static repository settings in page metadata and can carry the public OAuth client ID there too. The sign-in button opens GitHub with the device code pre-filled where GitHub supports it. Uploaded images are saved to `src/assets/uploads/`; posts are saved to `src/posts/` by default.
+Create a GitHub OAuth app and enable device flow. The editor carries the static repository settings and public OAuth client ID in page metadata. Uploaded images are saved to `src/assets/uploads/`; posts are saved to `src/posts/` by default.
+
+GitHub's token endpoints are not browser-callable from a static page, so the editor uses a tiny OAuth bridge for only the device-code and access-token exchange. Deploy `auth/github-device-oauth-worker.js` as a Cloudflare Worker and set:
+
+- `GITHUB_CLIENT_ID`: the GitHub App client ID.
+- `ALLOWED_ORIGIN`: the site origin, for example `https://blakeseufert.github.io`.
+
+Then set the deployed Worker URL in:
+
+```html
+<meta name="github-oauth-proxy-url" content="https://your-worker.example.workers.dev">
+```
+
+After OAuth completes, the static editor stores the returned token in the browser session and uses it directly for GitHub API create, update, and delete actions.
 
 ## Design Standards
 
