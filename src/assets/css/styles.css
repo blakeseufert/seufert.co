@@ -100,6 +100,7 @@ textarea {
 .icon-links {
   display: flex;
   gap: 0.45rem;
+  justify-self: end;
 }
 
 .icon-link {
@@ -610,6 +611,12 @@ figcaption {
     content: none;
   }
 
+  .topbar .icon-links {
+    gap: 0.5rem;
+    grid-column: 1;
+    justify-self: end;
+  }
+
   .site-mark {
     color: var(--muted);
     grid-column: 2;
@@ -647,11 +654,6 @@ figcaption {
     padding-top: 0;
     text-align: right;
     top: 24px;
-  }
-
-  .profile-panel__social {
-    justify-content: flex-end;
-    margin-bottom: 164px;
   }
 
   .profile-panel__portrait {
@@ -1427,15 +1429,8 @@ figcaption {
   .profile-panel__tagline,
   .profile-panel__bio,
   .profile-panel__more,
-  .profile-panel__made,
-  .profile-panel__social {
+  .profile-panel__made {
     grid-column: 2;
-  }
-
-  .profile-panel__social {
-    justify-content: flex-start;
-    margin-bottom: 0;
-    order: -1;
   }
 
   .profile-panel__tagline,

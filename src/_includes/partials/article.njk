@@ -9,19 +9,6 @@
   {% set postDate = post.date or page.date %}
   {% set postUrl = post.url or page.url %}
   <aside class="profile-panel" aria-label="About {{ site.author }}">
-    <nav class="icon-links profile-panel__social" aria-label="Social links">
-      {% for item in site.social %}
-        <a class="icon-link" href="{{ item.url }}" aria-label="{{ item.label }}">
-          {% if item.label == "Email" %}
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.75 6.75h14.5v10.5H4.75z"/><path d="m5.25 7.25 6.75 5.5 6.75-5.5"/></svg>
-          {% elif item.label == "LinkedIn" %}
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 10.5v7"/><path d="M6.5 6.75v.05"/><path d="M10.5 17.5v-7"/><path d="M10.5 13.4c0-1.8 1.15-3.1 2.9-3.1 1.65 0 2.6 1.05 2.6 3.05v4.15"/></svg>
-          {% else %}
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.25 18.5c-3.25 1-3.25-1.6-4.55-2"/><path d="M13.25 21v-3.25c0-.95.1-1.35-.45-1.9 2.6-.3 5.35-1.3 5.35-5.75a4.5 4.5 0 0 0-1.2-3.1 4.2 4.2 0 0 0-.05-3.05s-.95-.3-3.15 1.2a10.7 10.7 0 0 0-5.75 0c-2.2-1.5-3.15-1.2-3.15-1.2A4.2 4.2 0 0 0 4.8 7a4.5 4.5 0 0 0-1.2 3.1c0 4.45 2.75 5.45 5.35 5.75-.55.55-.55 1.1-.45 1.9V21"/></svg>
-          {% endif %}
-        </a>
-      {% endfor %}
-    </nav>
     <div class="profile-panel__portrait" aria-hidden="true">
       {% for i in [1, 2, 3, 4, 5, 6, 7, 8] %}
         <span class="profile-panel__streak profile-panel__streak--{{ i }}"></span>
