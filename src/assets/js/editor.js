@@ -388,7 +388,7 @@ function runCommand(command) {
     applyQuoteBlock("quote--pull");
   }
   if (command === "embed") {
-    const input = prompt("YouTube URL, iframe, or embed HTML");
+    const input = prompt("Paste a YouTube URL, iframe, or embed HTML. It will be saved into the post markdown.");
     if (input) insertEmbed(input);
   }
 
@@ -399,16 +399,20 @@ function runCommand(command) {
 function insertEmbed(input) {
   const youtubeId = parseYoutubeId(input);
   const markdown = youtubeId ? `{% youtube "${youtubeId}", "Embedded video" %}` : input;
-  const html = youtubeId
-    ? `<figure class="media-embed" data-md="${escapeHtml(markdown)}"><iframe src="https://www.youtube-nocookie.com/embed/${youtubeId}" title="Embedded video"></iframe><figcaption>Embedded video</figcaption></figure>`
-    : `<div data-md="${escapeHtml(markdown)}">${input}</div>`;
-
-  document.execCommand("insertHTML", false, `${html}<p><br></p>`);
+  document.execCommand("insertHTML", false, `${embedEditorHtml(markdown, youtubeId)}<p><br></p>`);
 }
 
 function parseYoutubeId(value) {
   const match = value.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([A-Za-z0-9_-]{6,})/);
   return match ? match[1] : "";
+}
+
+function embedEditorHtml(markdown, youtubeId = "") {
+  if (youtubeId) {
+    return `<figure class="media-embed editor-embed" contenteditable="false" data-md="${escapeHtml(markdown)}"><iframe src="https://www.youtube-nocookie.com/embed/${youtubeId}" title="Embedded video"></iframe><figcaption>Embedded video</figcaption></figure>`;
+  }
+
+  return `<figure class="editor-embed" contenteditable="false" data-md="${escapeHtml(markdown)}"><div class="editor-embed__label">Embed saved</div><pre>${escapeHtml(markdown)}</pre></figure>`;
 }
 
 function escapeHtml(value) {
@@ -730,7 +734,7 @@ function markdownToEditorHtml(markdown) {
     if (youtube) {
       const title = youtube[2] || "Embedded video";
       const shortcode = `{% youtube "${youtube[1]}", "${title}" %}`;
-      return `<figure class="media-embed" data-md="${escapeHtml(shortcode)}"><iframe src="https://www.youtube-nocookie.com/embed/${youtube[1]}" title="${escapeHtml(title)}"></iframe><figcaption>${escapeHtml(title)}</figcaption></figure>`;
+      return `<figure class="media-embed editor-embed" contenteditable="false" data-md="${escapeHtml(shortcode)}"><iframe src="https://www.youtube-nocookie.com/embed/${youtube[1]}" title="${escapeHtml(title)}"></iframe><figcaption>${escapeHtml(title)}</figcaption></figure>`;
     }
 
     if (pullquote) {
@@ -764,8 +768,8 @@ function markdownToEditorHtml(markdown) {
       return `<blockquote>${inlineHtml(quote)}</blockquote>`;
     }
 
-    if (value.startsWith("{% gallery") || value.startsWith("<")) {
-      return `<div data-md="${escapeHtml(value)}">${escapeHtml(value)}</div>`;
+    if (value.startsWith("{% gallery") || value.startsWith("{% video") || value.startsWith("<")) {
+      return embedEditorHtml(value);
     }
 
     return `<p>${inlineHtml(value)}</p>`;

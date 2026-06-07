@@ -386,10 +386,44 @@ button.pill {
   justify-content: space-between;
 }
 
+.share-cluster,
 .share-options {
   display: flex;
+  align-items: center;
   gap: 0.35rem;
   justify-content: flex-end;
+}
+
+.share-cluster {
+  min-width: 64px;
+}
+
+.article-share__icon--close,
+.share-cluster--open .article-share__icon--share {
+  display: none;
+}
+
+.share-cluster--open .article-share__icon--close {
+  display: block;
+}
+
+.share-options {
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transform: translateX(0.35rem);
+  transition: max-width 220ms ease, opacity 160ms ease, transform 220ms ease;
+  visibility: hidden;
+  white-space: nowrap;
+}
+
+.share-cluster--open .share-options {
+  max-width: 14rem;
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(0);
+  visibility: visible;
 }
 
 .share-option {
@@ -1389,6 +1423,31 @@ figcaption {
 .editor-body {
   min-height: 44vh;
   outline: none;
+}
+
+.editor-embed {
+  background: color-mix(in srgb, var(--paper) 82%, var(--canvas));
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  display: grid;
+  gap: 0.55rem;
+  margin: 1.4rem 0;
+  padding: 0.75rem;
+}
+
+.editor-embed pre {
+  color: var(--muted);
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  margin: 0;
+  overflow: auto;
+  white-space: pre-wrap;
+}
+
+.editor-embed__label {
+  color: var(--ink);
+  font-size: 0.72rem;
+  font-weight: 800;
 }
 
 .editor-body h1,

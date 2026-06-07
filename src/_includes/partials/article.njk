@@ -58,10 +58,17 @@
       {% endif %}
       <div class="article-meta">
         <time datetime="{{ postDate | isoDate }}">{{ postDate | readableDate }}</time>
-        <div class="share-options" aria-label="Share this post">
-          <a class="pill pill--small share-option" href="#" target="_blank" rel="noopener" data-share-target="twitter">Twitter</a>
-          <a class="pill pill--small share-option" href="#" data-share-target="email">Email</a>
-          <a class="pill pill--small share-option" href="#" target="_blank" rel="noopener" data-share-target="linkedin">LinkedIn</a>
+        <div class="share-cluster" data-share-cluster>
+          <button class="pill pill--button article-share" type="button" aria-expanded="false" data-share-toggle>
+            <svg class="pill__icon article-share__icon article-share__icon--share" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 12.5 15.5 16.5"/><path d="M15.5 7.5 8.5 11.5"/><circle cx="6.5" cy="12" r="2"/><circle cx="17.5" cy="6.5" r="2"/><circle cx="17.5" cy="17.5" r="2"/></svg>
+            <svg class="pill__icon article-share__icon article-share__icon--close" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12"/><path d="M18 6 6 18"/></svg>
+            <span data-share-label>Share</span>
+          </button>
+          <div class="share-options" aria-label="Share this post" data-share-options>
+            <a class="pill pill--small share-option" href="#" target="_blank" rel="noopener" data-share-target="twitter">Twitter</a>
+            <a class="pill pill--small share-option" href="#" data-share-target="email">Email</a>
+            <a class="pill pill--small share-option" href="#" target="_blank" rel="noopener" data-share-target="linkedin">LinkedIn</a>
+          </div>
         </div>
       </div>
     </header>
