@@ -27,7 +27,7 @@
               {% for link in role.links %}
                 <span class="pill pill--small role-list__badge role-list__badge--{{ link.tone }}">
                   {% if link.icon %}
-                    <img class="role-list__badge-icon" src="{{ link.icon }}" alt="" loading="lazy">
+                    <img class="role-list__badge-icon" src="{{ link.icon }}?v={{ site.assetVersion }}" alt="" loading="lazy">
                   {% endif %}
                   {{ link.label }}
                 </span>

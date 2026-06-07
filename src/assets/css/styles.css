@@ -268,9 +268,9 @@ button.pill {
   border-radius: 2px;
   display: block;
   flex: 0 0 auto;
-  height: 0.72rem;
+  height: 0.82rem;
   object-fit: contain;
-  width: 0.72rem;
+  width: 0.82rem;
 }
 
 .role-list__badge--green {
