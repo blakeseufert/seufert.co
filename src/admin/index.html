@@ -18,20 +18,16 @@ permalink: /editor/
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sura:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/styles.css?v={{ site.assetVersion }}">
   </head>
-  <body>
-    <header class="topbar">
-      <nav class="icon-links" aria-label="Editor links">
-        <a class="icon-link" href="/" aria-label="Home">S</a>
-      </nav>
-      <a class="site-mark" href="/">seufert.co</a>
-      <span class="editor-user" id="editorUser" hidden></span>
-    </header>
-
-    <main class="auth-shell" id="authGate">
-      <section class="editor-panel auth-card" aria-label="GitHub sign in">
-        <h1>Sign in</h1>
-        <p>Connect a GitHub token to create, edit, and delete posts in the site repository.</p>
-        <label>GitHub token <input id="tokenInput" type="password" autocomplete="off" placeholder="github_pat_..."></label>
+  <body class="editor-page">
+    <section class="editor-auth" id="authGate" aria-label="GitHub sign in">
+      <a class="editor-home-link" href="/">seufert.co</a>
+      <div class="editor-auth__content">
+        <div class="editor-auth__copy">
+          <h1 id="authTitle">Sign in</h1>
+          <p id="authCopy">Connect a GitHub token to create, edit, and delete posts in the site repository.</p>
+          <span class="editor-user" id="editorUser" hidden></span>
+        </div>
+        <label class="editor-auth__token" id="tokenField">GitHub token <input id="tokenInput" type="password" autocomplete="off" placeholder="github_pat_..."></label>
         <button class="pill pill--button" id="authButton" type="button">Connect token</button>
         <details class="auth-help">
           <summary>Token setup</summary>
@@ -46,8 +42,8 @@ permalink: /editor/
           <p>Shortcut: open <code>/editor/#token=github_pat_...</code> once. The editor saves it locally and removes it from the URL.</p>
         </details>
         <p class="status-line" id="statusLine"></p>
-      </section>
-    </main>
+      </div>
+    </section>
 
     <main class="admin-shell" id="editorApp" hidden>
       <aside class="editor-sidebar" aria-label="Post library">

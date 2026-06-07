@@ -11,9 +11,13 @@ const pendingImages = [];
 
 const els = {
   authGate: document.querySelector("#authGate"),
+  authTitle: document.querySelector("#authTitle"),
+  authCopy: document.querySelector("#authCopy"),
+  authHelp: document.querySelector(".auth-help"),
   editorApp: document.querySelector("#editorApp"),
   authButton: document.querySelector("#authButton"),
   token: document.querySelector("#tokenInput"),
+  tokenField: document.querySelector("#tokenField"),
   signOutButton: document.querySelector("#signOutButton"),
   publishPostButton: document.querySelector("#publishPostButton"),
   refreshPostsButton: document.querySelector("#refreshPostsButton"),
@@ -287,18 +291,29 @@ async function validateSession() {
 
 function showAuthGate() {
   els.authGate.hidden = false;
+  els.authGate.classList.remove("editor-auth--connected");
   els.editorApp.hidden = true;
   els.editorUser.hidden = true;
+  els.tokenField.hidden = false;
+  els.authHelp.hidden = false;
+  els.authTitle.textContent = "Sign in";
+  els.authCopy.hidden = false;
   els.authButton.textContent = "Connect token";
   setStatus("Paste a repo-scoped GitHub token once. It stays in this browser until you sign out.");
 }
 
 function showEditor() {
-  els.authGate.hidden = true;
+  els.authGate.hidden = false;
+  els.authGate.classList.add("editor-auth--connected");
   els.editorApp.hidden = false;
   els.editorUser.hidden = false;
+  els.tokenField.hidden = true;
+  els.authHelp.hidden = true;
+  els.authTitle.textContent = "Editor";
+  els.authCopy.hidden = true;
   els.editorUser.textContent = signedInUser ? `Signed in as ${signedInUser.login}` : "";
-  setStatus("");
+  els.authButton.textContent = "Sign out";
+  setStatus("GitHub connected.");
 }
 
 async function connectToken() {
@@ -956,7 +971,13 @@ els.newPostButton.addEventListener("click", () => {
 });
 els.deletePostButton.addEventListener("click", () => deleteCurrentPost().catch((error) => setStatus(error.message)));
 els.signOutButton.addEventListener("click", signOut);
-els.authButton.addEventListener("click", () => connectToken().catch((error) => setStatus(error.message)));
+els.authButton.addEventListener("click", () => {
+  if (signedInUser) {
+    signOut();
+    return;
+  }
+  connectToken().catch((error) => setStatus(error.message));
+});
 document.addEventListener("selectionchange", updateToolbarState);
 
 loadConfig();
