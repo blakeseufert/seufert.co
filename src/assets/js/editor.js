@@ -22,7 +22,6 @@ const els = {
   publishPostButton: document.querySelector("#publishPostButton"),
   refreshPostsButton: document.querySelector("#refreshPostsButton"),
   newPostButton: document.querySelector("#newPostButton"),
-  deletePostButton: document.querySelector("#deletePostButton"),
   coverImageInput: document.querySelector("#coverImageInput"),
   coverButtonText: document.querySelector("#coverButtonText"),
   coverPreview: document.querySelector("#coverPreview"),
@@ -803,14 +802,19 @@ function renderPostList() {
   }
 
   posts.forEach((post) => {
+    const item = document.createElement("div");
+    item.className = "post-list__item";
+    if (currentPost && currentPost.path === post.path) {
+      item.classList.add("post-list__item--active");
+      if (isDirty) item.classList.add("post-list__item--dirty");
+    }
+
     const button = document.createElement("button");
-    button.className = "post-list__item";
+    button.className = "post-list__select";
     button.type = "button";
     button.dataset.path = post.path;
     if (currentPost && currentPost.path === post.path) {
-      button.classList.add("post-list__item--active");
       button.setAttribute("aria-current", "true");
-      if (isDirty) button.classList.add("post-list__item--dirty");
     }
 
     const title = document.createElement("span");
@@ -824,7 +828,35 @@ function renderPostList() {
       : post.data.date || "No date";
 
     button.append(title, meta);
-    els.postList.append(button);
+    const actions = document.createElement("details");
+    actions.className = "post-list__actions";
+
+    const summary = document.createElement("summary");
+    summary.className = "post-list__actions-toggle";
+    summary.setAttribute("aria-label", `Actions for ${title.textContent}`);
+    summary.textContent = "...";
+
+    const menu = document.createElement("div");
+    menu.className = "post-list__actions-menu";
+
+    const duplicate = document.createElement("button");
+    duplicate.className = "post-list__action";
+    duplicate.type = "button";
+    duplicate.dataset.action = "duplicate";
+    duplicate.dataset.path = post.path;
+    duplicate.textContent = "Duplicate";
+
+    const remove = document.createElement("button");
+    remove.className = "post-list__action post-list__action--danger";
+    remove.type = "button";
+    remove.dataset.action = "delete";
+    remove.dataset.path = post.path;
+    remove.textContent = "Delete";
+
+    menu.append(duplicate, remove);
+    actions.append(summary, menu);
+    item.append(button, actions);
+    els.postList.append(item);
   });
 }
 
@@ -860,7 +892,10 @@ async function loadPostList() {
     };
   }));
 
-  posts = loaded.sort((a, b) => new Date(b.data.date || 0) - new Date(a.data.date || 0));
+  posts = loaded.sort((a, b) => {
+    const dateDiff = (Date.parse(b.data.date) || 0) - (Date.parse(a.data.date) || 0);
+    return dateDiff || a.name.localeCompare(b.name);
+  });
   renderPostList();
   setStatus(`Loaded ${posts.length} post${posts.length === 1 ? "" : "s"}.`);
 }
@@ -895,6 +930,40 @@ async function loadSelectedPost(path) {
   setStatus(`Editing ${post.name}.`);
 }
 
+async function fetchPost(path) {
+  const post = posts.find((item) => item.path === path);
+  if (!post) throw new Error("Post not found.");
+
+  const response = await githubRequest(`contents/${apiPath(path)}?ref=${encodeURIComponent(getConfig().branch)}`);
+  const data = await response.json();
+  const markdown = textFromBase64(data.content || "");
+  const parsed = parseFrontmatter(markdown);
+
+  return {
+    ...post,
+    sha: data.sha,
+    markdown,
+    data: parsed.data,
+    body: parsed.body
+  };
+}
+
+async function duplicatePost(path) {
+  if (!canDiscardChanges()) return;
+
+  const post = await fetchPost(path);
+  currentPost = null;
+  pendingImages.splice(0);
+  setTitle(`Copy of ${post.data.title || post.name.replace(/\.md$/, "")}`);
+  els.date.value = today();
+  setCoverPreview(post.data.cover ? publicUrl(post.data.cover) : "", post.data.cover || "");
+  els.editor.innerHTML = markdownToEditorHtml(post.body);
+  lastCleanSnapshot = "";
+  isDirty = true;
+  updateDirtyState();
+  setStatus("Duplicated as an unpublished draft. Publish when ready.");
+}
+
 async function savePost() {
   const slug = currentSlug();
   const wasUpdate = Boolean(currentPost);
@@ -919,18 +988,16 @@ async function savePost() {
   setStatus(`${wasUpdate ? "Post updated" : "Post published"}. GitHub Pages will rebuild on push.`);
 }
 
-async function deleteCurrentPost() {
-  if (!currentPost) {
-    setStatus("Select a post to delete.");
-    return;
-  }
-
-  const confirmed = confirm(`Delete "${currentPost.data.title || currentPost.name}" from ${currentPost.path}?`);
+async function deletePost(path) {
+  const post = await fetchPost(path);
+  const confirmed = confirm(`Delete "${post.data.title || post.name}" from ${post.path}?`);
   if (!confirmed) return;
 
+  const deletingCurrent = currentPost && currentPost.path === post.path;
+
   setStatus("Deleting post...");
-  await deleteFile(currentPost.path, currentPost.sha, `Delete ${currentPost.data.title || currentPost.name}`);
-  resetEditor();
+  await deleteFile(post.path, post.sha, `Delete ${post.data.title || post.name}`);
+  if (deletingCurrent) resetEditor();
   await loadPostList();
   setStatus("Post deleted. GitHub Pages will rebuild on push.");
 }
@@ -946,6 +1013,16 @@ els.title.addEventListener("keydown", (event) => {
   els.editor.focus();
 });
 els.postList.addEventListener("click", (event) => {
+  const action = event.target.closest("[data-action]");
+  if (action) {
+    event.preventDefault();
+    action.closest("details")?.removeAttribute("open");
+    const path = action.dataset.path;
+    const promise = action.dataset.action === "duplicate" ? duplicatePost(path) : deletePost(path);
+    promise.catch((error) => setStatus(error.message));
+    return;
+  }
+
   const item = event.target.closest("[data-path]");
   if (!item) return;
   if (currentPost && currentPost.path === item.dataset.path) return;
@@ -973,7 +1050,6 @@ els.refreshPostsButton.addEventListener("click", () => loadPostList().catch((err
 els.newPostButton.addEventListener("click", () => {
   if (canDiscardChanges()) resetEditor();
 });
-els.deletePostButton.addEventListener("click", () => deleteCurrentPost().catch((error) => setStatus(error.message)));
 els.signOutButton.addEventListener("click", signOut);
 els.authButton.addEventListener("click", () => {
   if (signedInUser) {
@@ -983,6 +1059,10 @@ els.authButton.addEventListener("click", () => {
   connectToken().catch((error) => setStatus(error.message));
 });
 document.addEventListener("selectionchange", updateToolbarState);
+document.addEventListener("click", (event) => {
+  if (event.target.closest(".post-list__actions")) return;
+  document.querySelectorAll(".post-list__actions[open]").forEach((menu) => menu.removeAttribute("open"));
+});
 
 loadConfig();
 validateSession();

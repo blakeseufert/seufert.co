@@ -54,14 +54,12 @@ permalink: /editor/
         <div class="post-list" id="postList"></div>
         <div class="editor-sidebar__actions">
           <button class="pill pill--button" id="refreshPostsButton" type="button">Refresh</button>
-          <button class="pill pill--button pill--danger" id="deletePostButton" type="button">Delete</button>
           <button class="pill pill--button" id="signOutButton" type="button">Sign out</button>
         </div>
       </aside>
 
       <section class="compose-shell" aria-label="Editor">
         <div class="compose-topline">
-          <label class="inline-date">Date <input id="dateInput" type="date"></label>
           <span class="dirty-state" id="dirtyState" hidden>Unpublished changes</span>
           <button class="pill pill--button" id="publishPostButton" type="button">Publish</button>
         </div>
@@ -73,6 +71,9 @@ permalink: /editor/
             <input id="coverImageInput" type="file" accept="image/*" hidden>
           </label>
           <img class="cover-preview" id="coverPreview" alt="" hidden>
+          <div class="article-meta editor-article-meta">
+            <label class="inline-date">Date <input id="dateInput" type="date"></label>
+          </div>
 
           <div class="editor-toolbar" aria-label="Formatting">
             <button class="pill pill--button" data-command="h2" type="button">H2</button>
