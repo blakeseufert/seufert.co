@@ -1626,6 +1626,50 @@ figcaption {
   font-weight: 800;
 }
 
+.editor-media {
+  position: relative;
+}
+
+.editor-media__hit {
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  inset: 0;
+  padding: 0;
+  position: absolute;
+  z-index: 1;
+}
+
+.editor-media__actions {
+  display: flex;
+  gap: 0.45rem;
+  left: 0.5rem;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  top: 0.5rem;
+  transform: translateY(-0.25rem);
+  transition: opacity 160ms ease, transform 160ms ease;
+  z-index: 3;
+}
+
+.editor-media--selected .editor-media__actions {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.editor-media--selected iframe,
+.editor-media--selected video {
+  outline: 2px solid color-mix(in srgb, var(--coral) 78%, transparent);
+  outline-offset: 2px;
+}
+
+.editor-media__actions .pill {
+  background: color-mix(in srgb, var(--paper) 94%, transparent);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--ink) 14%, transparent);
+}
+
 .editor-gallery {
   display: grid;
   gap: 0.75rem;

@@ -47,12 +47,12 @@ module.exports = function (eleventyConfig) {
 
   eleventyConfig.addShortcode("youtube", (id, title = "Embedded video") => {
     const safeTitle = String(title).replace(/"/g, "&quot;");
-    return `<figure class="media-embed"><iframe src="https://www.youtube-nocookie.com/embed/${id}" title="${safeTitle}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe><figcaption>${safeTitle}</figcaption></figure>`;
+    return `<figure class="media-embed"><iframe src="https://www.youtube-nocookie.com/embed/${id}" title="${safeTitle}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></figure>`;
   });
 
   eleventyConfig.addShortcode("video", (src, title = "Embedded video") => {
     const safeTitle = String(title).replace(/"/g, "&quot;");
-    return `<figure class="media-embed"><video controls preload="metadata" src="${src}"></video><figcaption>${safeTitle}</figcaption></figure>`;
+    return `<figure class="media-embed"><video controls preload="metadata" src="${src}" title="${safeTitle}"></video></figure>`;
   });
 
   eleventyConfig.addShortcode("image", (src, alt = "", layout = "left") => {

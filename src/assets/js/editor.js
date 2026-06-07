@@ -417,10 +417,33 @@ function parseYoutubeId(value) {
 
 function embedEditorHtml(markdown, youtubeId = "") {
   if (youtubeId) {
-    return `<figure class="media-embed editor-embed" contenteditable="false" data-md="${escapeHtml(markdown)}"><iframe src="https://www.youtube-nocookie.com/embed/${youtubeId}" title="Embedded video"></iframe><figcaption>Embedded video</figcaption></figure>`;
+    return mediaEditorHtml(markdown, `<iframe src="https://www.youtube-nocookie.com/embed/${youtubeId}" title="Embedded video"></iframe>`);
   }
 
   return `<figure class="editor-embed" contenteditable="false" data-md="${escapeHtml(markdown)}"><div class="editor-embed__label">Embed saved</div><pre>${escapeHtml(markdown)}</pre></figure>`;
+}
+
+function mediaEditorHtml(markdown, mediaHtml) {
+  return `
+    <figure class="media-embed editor-embed editor-media" contenteditable="false" data-md="${escapeHtml(markdown)}">
+      ${mediaHtml}
+      <button class="editor-media__hit" data-media-action="select" type="button" aria-label="Select video"></button>
+      <div class="editor-media__actions">
+        <button class="pill pill--button" data-media-action="remove-media" type="button">Remove video</button>
+      </div>
+    </figure>`;
+}
+
+function parseVideoShortcode(value) {
+  const match = String(value || "")
+    .trim()
+    .match(/^\{%\s*video\s+"([^"]+)"(?:,\s*"([^"]*)")?\s*%\}$/);
+
+  if (!match) return null;
+  return {
+    src: match[1],
+    title: match[2] || "Embedded video"
+  };
 }
 
 function parseGalleryShortcode(value) {
@@ -830,6 +853,28 @@ function handleEditorImageUpload(event) {
   handleImageUpload(event).catch((error) => setStatus(error.message));
 }
 
+function handleMediaAction(event) {
+  const action = event.target.closest("[data-media-action]");
+  const media = event.target.closest(".editor-media");
+  if (!action || !media) return;
+
+  event.preventDefault();
+
+  if (action.dataset.mediaAction === "select") {
+    els.editor
+      .querySelectorAll(".editor-media--selected")
+      .forEach((item) => item.classList.remove("editor-media--selected"));
+    media.classList.add("editor-media--selected");
+    return;
+  }
+
+  if (action.dataset.mediaAction === "remove-media") {
+    media.remove();
+    if (!els.editor.children.length) els.editor.innerHTML = "<p><br></p>";
+    checkDirtyState();
+  }
+}
+
 function blockMarkdown(node) {
   if (node.nodeType !== Node.ELEMENT_NODE) return "";
 
@@ -986,6 +1031,7 @@ function markdownToEditorHtml(markdown) {
     const image = value.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
     const imageShortcode = parseImageShortcode(value);
     const youtube = value.match(/^\{%\s*youtube\s+"([^"]+)"(?:,\s*"([^"]+)")?\s*%\}$/);
+    const video = parseVideoShortcode(value);
     const gallery = parseGalleryShortcode(value);
     const pullquote = value.match(/^\{%\s*pullquote[^%]*%\}\n?([\s\S]*?)\n?\{%\s*endpullquote\s*%\}$/);
     const quietquote = value.match(/^\{%\s*quietquote[^%]*%\}\n?([\s\S]*?)\n?\{%\s*endquietquote\s*%\}$/);
@@ -1001,7 +1047,12 @@ function markdownToEditorHtml(markdown) {
     if (youtube) {
       const title = youtube[2] || "Embedded video";
       const shortcode = `{% youtube "${youtube[1]}", "${title}" %}`;
-      return `<figure class="media-embed editor-embed" contenteditable="false" data-md="${escapeHtml(shortcode)}"><iframe src="https://www.youtube-nocookie.com/embed/${youtube[1]}" title="${escapeHtml(title)}"></iframe><figcaption>${escapeHtml(title)}</figcaption></figure>`;
+      return mediaEditorHtml(shortcode, `<iframe src="https://www.youtube-nocookie.com/embed/${youtube[1]}" title="${escapeHtml(title)}"></iframe>`);
+    }
+
+    if (video) {
+      const shortcode = `{% video "${video.src}", "${video.title}" %}`;
+      return mediaEditorHtml(shortcode, `<video controls preload="metadata" src="${escapeHtml(publicUrl(video.src))}" title="${escapeHtml(video.title)}"></video>`);
     }
 
     if (pullquote) {
@@ -1299,6 +1350,7 @@ els.postList.addEventListener("click", (event) => {
 els.editor.addEventListener("keyup", handleMarkdownShortcut);
 els.editor.addEventListener("click", handleGalleryAction);
 els.editor.addEventListener("click", handleImageAction);
+els.editor.addEventListener("click", handleMediaAction);
 els.editor.addEventListener("change", handleEditorImageUpload);
 els.editor.addEventListener("input", () => {
   checkDirtyState();
@@ -1345,6 +1397,12 @@ document.addEventListener("click", (event) => {
     document
       .querySelectorAll(".editor-image--selected")
       .forEach((item) => item.classList.remove("editor-image--selected"));
+  }
+
+  if (!event.target.closest(".editor-media")) {
+    document
+      .querySelectorAll(".editor-media--selected")
+      .forEach((item) => item.classList.remove("editor-media--selected"));
   }
 });
 
