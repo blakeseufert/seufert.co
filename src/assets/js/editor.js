@@ -328,6 +328,33 @@ function selectedText() {
   return window.getSelection()?.toString() || "";
 }
 
+function plainParagraphFromBlock(block) {
+  const paragraph = document.createElement("p");
+  const onlyChild = block?.children.length === 1 ? block.children[0] : null;
+  if (onlyChild?.tagName === "P") {
+    paragraph.innerHTML = onlyChild.innerHTML;
+  } else if (block) {
+    paragraph.innerHTML = block.innerHTML;
+  }
+  if (!paragraph.textContent.trim()) paragraph.innerHTML = "<br>";
+  return paragraph;
+}
+
+function applyQuoteBlock(className = "") {
+  const block = currentBlock();
+  if (!block) return;
+
+  if (block.tagName === "BLOCKQUOTE" && (!className || block.classList.contains(className))) {
+    replaceBlock(block, plainParagraphFromBlock(block));
+    return;
+  }
+
+  const quote = document.createElement("blockquote");
+  if (className) quote.className = `quote ${className}`;
+  quote.innerHTML = block.innerHTML || escapeHtml(selectedText() || "Quote text");
+  replaceBlock(block, quote);
+}
+
 function runCommand(command) {
   els.editor.focus();
 
@@ -340,15 +367,10 @@ function runCommand(command) {
     if (url) document.execCommand("createLink", false, url);
   }
   if (command === "quote") {
-    document.execCommand("formatBlock", false, "blockquote");
+    applyQuoteBlock();
   }
   if (command === "pullquote") {
-    const text = selectedText() || "Quote text";
-    document.execCommand(
-      "insertHTML",
-      false,
-      `<blockquote class="quote quote--pull"><p>${escapeHtml(text)}</p></blockquote><p><br></p>`
-    );
+    applyQuoteBlock("quote--pull");
   }
   if (command === "embed") {
     const input = prompt("YouTube URL, iframe, or embed HTML");
