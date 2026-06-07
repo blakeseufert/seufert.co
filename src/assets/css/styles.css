@@ -516,7 +516,15 @@ figcaption {
   gap: 0.9rem;
   grid-template-columns: 64px 1fr auto;
   min-height: 52px;
+  padding: 0.35rem 0;
   text-decoration: none;
+}
+
+.more-post--current {
+  background: rgba(217, 217, 217, 0.2);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius);
+  padding-inline: 0.5rem;
 }
 
 .more-post img {
@@ -526,7 +534,7 @@ figcaption {
   width: 64px;
 }
 
-.more-post span {
+.more-post__title {
   font-family: var(--font-display);
   font-size: 0.96rem;
   font-weight: 700;
@@ -535,10 +543,21 @@ figcaption {
   text-underline-offset: 0.12em;
 }
 
+.more-post__meta {
+  align-items: end;
+  display: grid;
+  gap: 0.35rem;
+  justify-items: end;
+}
+
 .more-post time {
   color: var(--muted);
   font-size: 0.65rem;
   font-weight: 800;
+}
+
+.more-post__current {
+  color: var(--ink);
 }
 
 .site-watermark {
@@ -589,10 +608,11 @@ figcaption {
   }
 
   .site-shell {
-    gap: 96px;
-    grid-template-columns: 254px 771px;
+    gap: clamp(56px, 7vw, 96px);
+    grid-template-columns: 254px minmax(0, 771px);
     max-width: 1167px;
     padding: 228px 24px 92px;
+    width: 100%;
   }
 
   .profile-panel {
@@ -785,7 +805,8 @@ figcaption {
   }
 
   .article-layout {
-    width: 771px;
+    max-width: 771px;
+    width: 100%;
   }
 
   .article-hero {
@@ -871,7 +892,7 @@ figcaption {
     aspect-ratio: 64 / 40;
   }
 
-  .more-post span {
+  .more-post__title {
     font-size: 1.25rem;
   }
 
@@ -1135,7 +1156,12 @@ figcaption {
     grid-template-columns: 56px 1fr;
   }
 
-  .more-post time {
+  .more-post__meta {
     grid-column: 2;
+    justify-items: start;
+  }
+
+  .more-post time {
+    grid-column: auto;
   }
 }

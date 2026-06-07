@@ -67,17 +67,21 @@
       {% endif %}
     </div>
 
-    <footer class="more-posts" aria-label="More posts">
+    <footer class="more-posts" aria-label="Posts">
       {% for item in collections.posts %}
-        {% if item.url != postUrl and loop.index0 < 4 %}
-          <a class="more-post" href="{{ item.url }}">
-            {% if item.data.cover %}
-              <img src="{{ item.data.cover }}" alt="" loading="lazy">
-            {% endif %}
-            <span>{{ item.data.title }}</span>
+        {% set isCurrentPost = item.url == postUrl %}
+        <a class="more-post{% if isCurrentPost %} more-post--current{% endif %}" href="{{ item.url }}"{% if isCurrentPost %} aria-current="page"{% endif %}>
+          {% if item.data.cover %}
+            <img src="{{ item.data.cover }}" alt="" loading="lazy">
+          {% endif %}
+          <span class="more-post__title">{{ item.data.title }}</span>
+          <span class="more-post__meta">
             <time datetime="{{ item.date | isoDate }}">{{ item.date | readableDate }}</time>
-          </a>
-        {% endif %}
+            {% if isCurrentPost %}
+              <span class="pill pill--small more-post__current">Current</span>
+            {% endif %}
+          </span>
+        </a>
       {% endfor %}
     </footer>
     <div class="site-watermark" aria-hidden="true">{{ site.name }}</div>
