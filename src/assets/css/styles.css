@@ -744,6 +744,10 @@ figcaption {
   display: none;
 }
 
+.mobile-site-footer {
+  display: none;
+}
+
 @media (min-width: 861px) {
   .topbar {
     align-items: center;
@@ -1806,35 +1810,80 @@ figcaption {
 
 @media (max-width: 860px) {
   .topbar {
-    padding-top: 22px;
+    gap: 1rem;
+    grid-template-columns: auto 1fr;
+    padding: 22px 18px 8px;
+  }
+
+  .topbar .icon-links {
+    gap: 0.62rem;
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+  }
+
+  .site-mark {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: start;
+  }
+
+  .icon-link {
+    background: transparent;
+    border: 0;
+    color: #917a70;
+    height: 20px;
+    width: 20px;
+  }
+
+  .icon-link svg {
+    display: block;
+    fill: none;
+    height: 100%;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
+    width: 100%;
+  }
+
+  .social-pill {
+    left: auto;
+    right: 0;
+    transform: translateY(-0.2rem);
+  }
+
+  .icon-link:hover .social-pill,
+  .icon-link:focus-visible .social-pill {
+    transform: translateY(0);
   }
 
   .site-shell {
-    gap: 2.8rem;
+    gap: 3.2rem;
     grid-template-columns: minmax(0, 1fr);
-    padding-top: 36px;
+    padding: 24px 18px 0;
   }
 
   .profile-panel {
-    column-gap: 12px;
     display: grid;
-    grid-template-columns: 96px 1fr;
+    gap: 0.95rem;
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
     padding-top: 0;
     position: static;
-    text-align: left;
+    text-align: center;
   }
 
   .profile-panel__portrait {
-    align-self: start;
     background: linear-gradient(180deg, var(--coral) 0%, #df8064 100%);
-    border-radius: 30px 4px 4px 4px;
+    border-radius: 56px 6px 6px 6px;
     grid-column: 1;
-    grid-row: 1 / span 4;
-    height: 96px;
+    height: clamp(190px, 46vw, 300px);
     margin: 0;
+    max-width: 770px;
     overflow: hidden;
     position: relative;
-    width: 96px;
+    width: 100%;
   }
 
   .profile-panel__portrait::before,
@@ -1847,44 +1896,107 @@ figcaption {
     border-radius: 0;
     bottom: 0;
     box-shadow: none;
-    height: 108px;
-    left: 16px;
+    height: min(112%, 340px);
+    left: 50%;
     margin: 0;
     object-fit: contain;
+    object-position: bottom center;
     position: absolute;
-    width: 96px;
+    transform: translateX(-50%);
+    width: min(58vw, 260px);
   }
 
   .profile-panel__name,
   .profile-panel__tagline,
   .profile-panel__bio,
-  .profile-panel__more,
-  .profile-panel__made {
-    grid-column: 2;
+  .profile-panel__more {
+    grid-column: 1;
+  }
+
+  .profile-panel__name {
+    font-size: clamp(2.1rem, 10vw, 3.25rem);
+    line-height: 0.98;
+    margin-top: 0.15rem;
   }
 
   .profile-panel__tagline,
   .profile-panel__bio {
-    margin-left: 0;
-    max-width: none;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 32rem;
   }
 
   .profile-panel__more {
-    justify-self: start;
+    justify-self: center;
     white-space: nowrap;
   }
 
   .role-list {
-    display: none;
+    display: grid;
+    font-family: var(--font-display);
+    font-size: 0.875rem;
+    gap: 0.95rem;
+    grid-column: 1;
+    justify-items: center;
+    margin: 0.35rem 0 1.1rem;
+    max-width: 32rem;
+    text-align: center;
+    width: 100%;
+  }
+
+  .role-list p span {
+    display: inline;
+  }
+
+  .role-list__links {
+    justify-content: center;
   }
 
   .profile-panel .pill {
-    justify-self: start;
+    justify-self: center;
+  }
+
+  .profile-panel > .profile-panel__made {
+    display: none;
   }
 
   .post-body,
   .more-posts {
     max-width: none;
+  }
+
+  .more-posts {
+    margin-top: 7rem;
+  }
+
+  .site-watermark {
+    background: linear-gradient(
+      180deg,
+      rgba(174, 161, 152, 0.28) 0%,
+      rgba(174, 161, 152, 0.12) 48%,
+      rgba(174, 161, 152, 0) 100%
+    );
+    background-clip: text;
+    color: transparent;
+    display: block;
+    font-family: var(--font-display);
+    font-size: clamp(5.2rem, 24vw, 9rem);
+    font-weight: 700;
+    line-height: 0.9;
+    margin-top: 5rem;
+    overflow: hidden;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  .mobile-site-footer {
+    color: #977c70;
+    display: block;
+    font-family: var(--font-display);
+    font-size: 0.625rem;
+    font-weight: 700;
+    line-height: 1;
+    margin: 0.9rem 0 2.5rem;
   }
 
   .admin-shell {
@@ -1904,11 +2016,7 @@ figcaption {
 
 @media (max-width: 560px) {
   .topbar {
-    grid-template-columns: 1fr auto;
-  }
-
-  .site-mark {
-    justify-self: end;
+    grid-template-columns: auto 1fr;
   }
 
   .topbar > .pill {
@@ -1924,18 +2032,17 @@ figcaption {
   }
 
   .profile-panel {
-    grid-template-columns: 76px 1fr;
+    gap: 0.85rem;
   }
 
   .profile-panel__portrait {
-    height: 76px;
-    width: 76px;
+    height: clamp(176px, 58vw, 240px);
   }
 
   .profile-panel__image {
-    height: 88px;
-    left: 10px;
-    width: 78px;
+    height: min(114%, 270px);
+    left: 50%;
+    width: min(64vw, 210px);
   }
 
   .gallery {
