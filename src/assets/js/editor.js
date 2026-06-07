@@ -40,6 +40,7 @@ let posts = [];
 let currentPost = null;
 let signedInUser = null;
 let uploadTarget = "inline";
+let activeGallery = null;
 let lastCleanSnapshot = "";
 let isDirty = false;
 
@@ -396,6 +397,13 @@ function runCommand(command) {
 
 function insertEmbed(input) {
   const youtubeId = parseYoutubeId(input);
+  const galleryItems = parseGalleryShortcode(input);
+
+  if (galleryItems) {
+    document.execCommand("insertHTML", false, `${galleryEditorHtml(galleryItems)}<p><br></p>`);
+    return;
+  }
+
   const markdown = youtubeId ? `{% youtube "${youtubeId}", "Embedded video" %}` : input;
   document.execCommand("insertHTML", false, `${embedEditorHtml(markdown, youtubeId)}<p><br></p>`);
 }
@@ -411,6 +419,92 @@ function embedEditorHtml(markdown, youtubeId = "") {
   }
 
   return `<figure class="editor-embed" contenteditable="false" data-md="${escapeHtml(markdown)}"><div class="editor-embed__label">Embed saved</div><pre>${escapeHtml(markdown)}</pre></figure>`;
+}
+
+function parseGalleryShortcode(value) {
+  const match = String(value || "").trim().match(/^\{%\s*gallery\s+([\s\S]*?)\s*%\}$/);
+  if (!match) return null;
+
+  const items = [];
+  const quotedValue = /"((?:\\.|[^"\\])*)"/g;
+  let item;
+  while ((item = quotedValue.exec(match[1]))) {
+    const [src = "", alt = "", caption = ""] = item[1]
+      .replace(/\\"/g, '"')
+      .replace(/\\\\/g, "\\")
+      .split("|");
+    if (src.trim()) items.push({ src: src.trim(), alt: alt.trim(), caption: caption.trim() });
+  }
+
+  return items.length ? items : null;
+}
+
+function galleryId() {
+  return `gallery-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function galleryItemHtml({ src = "", alt = "", caption = "" }, displaySrc = "") {
+  const safeSrc = escapeHtml(src);
+  const safeAlt = escapeHtml(alt);
+  const safeCaption = escapeHtml(caption);
+
+  return `
+    <figure class="editor-gallery__item" data-gallery-item>
+      <img src="${escapeHtml(displaySrc || publicUrl(src))}" alt="${safeAlt}" data-md-src="${safeSrc}">
+      <div class="editor-gallery__fields">
+        <label>Alt <input data-gallery-alt type="text" value="${safeAlt}" placeholder="Describe the image"></label>
+        <label>Caption <input data-gallery-caption type="text" value="${safeCaption}" placeholder="Optional caption"></label>
+      </div>
+      <div class="editor-gallery__actions">
+        <button class="pill pill--button" data-gallery-action="remove-caption" type="button">Remove caption</button>
+        <button class="pill pill--button" data-gallery-action="remove-item" type="button">Remove image</button>
+      </div>
+    </figure>`;
+}
+
+function galleryEditorHtml(items = []) {
+  return `
+    <section class="editor-gallery" contenteditable="false" data-gallery-id="${galleryId()}">
+      <div class="gallery editor-gallery__grid">
+        ${items.map((item) => galleryItemHtml(item)).join("")}
+      </div>
+      <div class="editor-gallery__controls">
+        <button class="pill pill--button" data-gallery-action="add-image" type="button">Add image</button>
+      </div>
+    </section>`;
+}
+
+function appendGalleryImage(gallery, dataUrl, publicPath) {
+  const grid = gallery.querySelector(".editor-gallery__grid");
+  if (!grid) return;
+  grid.insertAdjacentHTML("beforeend", galleryItemHtml({ src: publicPath }, dataUrl));
+}
+
+function handleGalleryAction(event) {
+  const action = event.target.closest("[data-gallery-action]");
+  if (!action) return;
+
+  event.preventDefault();
+  const gallery = action.closest(".editor-gallery");
+  const item = action.closest("[data-gallery-item]");
+
+  if (action.dataset.galleryAction === "add-image" && gallery) {
+    activeGallery = gallery;
+    uploadTarget = "gallery";
+    els.imageInput.click();
+    return;
+  }
+
+  if (action.dataset.galleryAction === "remove-caption" && item) {
+    const caption = item.querySelector("[data-gallery-caption]");
+    if (caption) caption.value = "";
+  }
+
+  if (action.dataset.galleryAction === "remove-item" && item) {
+    item.remove();
+  }
+
+  checkDirtyState();
 }
 
 function escapeHtml(value) {
@@ -573,6 +667,8 @@ async function handleImageUpload(event) {
 
   if (uploadTarget === "cover") {
     setCoverPreview(dataUrl, extensionPath);
+  } else if (uploadTarget === "gallery" && activeGallery) {
+    appendGalleryImage(activeGallery, dataUrl, extensionPath);
   } else {
     insertInlineImage(dataUrl, extensionPath);
   }
@@ -581,6 +677,7 @@ async function handleImageUpload(event) {
   setStatus(`Queued ${file.name}.`);
   event.target.value = "";
   uploadTarget = "inline";
+  activeGallery = null;
 }
 
 function inlineMarkdown(node) {
@@ -600,6 +697,7 @@ function blockMarkdown(node) {
   if (node.nodeType !== Node.ELEMENT_NODE) return "";
 
   const text = inlineMarkdown(node).trim();
+  if (node.classList.contains("editor-gallery")) return galleryMarkdown(node);
   if (node.dataset.md) return node.dataset.md;
   if (node.tagName === "H1") return `# ${text}`;
   if (node.tagName === "H2") return `## ${text}`;
@@ -638,6 +736,32 @@ function blockMarkdown(node) {
   }
 
   return text;
+}
+
+function galleryField(value) {
+  return String(value || "")
+    .trim()
+    .replace(/\|/g, " ")
+    .replace(/\\/g, "\\\\")
+    .replace(/"/g, '\\"');
+}
+
+function galleryMarkdown(node) {
+  const items = Array.from(node.querySelectorAll("[data-gallery-item]"))
+    .map((item) => {
+      const image = item.querySelector("img");
+      const src = image?.dataset.mdSrc || "";
+      const alt = item.querySelector("[data-gallery-alt]")?.value || image?.alt || "";
+      const caption = item.querySelector("[data-gallery-caption]")?.value || "";
+      if (!src) return "";
+
+      const fields = [src, alt];
+      if (caption.trim()) fields.push(caption);
+      return `"${fields.map(galleryField).join("|")}"`;
+    })
+    .filter(Boolean);
+
+  return items.length ? `{% gallery ${items.join(", ")} %}` : "";
 }
 
 function editorMarkdown() {
@@ -726,8 +850,13 @@ function markdownToEditorHtml(markdown) {
     const value = block.trim();
     const image = value.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
     const youtube = value.match(/^\{%\s*youtube\s+"([^"]+)"(?:,\s*"([^"]+)")?\s*%\}$/);
+    const gallery = parseGalleryShortcode(value);
     const pullquote = value.match(/^\{%\s*pullquote[^%]*%\}\n?([\s\S]*?)\n?\{%\s*endpullquote\s*%\}$/);
     const quietquote = value.match(/^\{%\s*quietquote[^%]*%\}\n?([\s\S]*?)\n?\{%\s*endquietquote\s*%\}$/);
+
+    if (gallery) {
+      return galleryEditorHtml(gallery);
+    }
 
     if (youtube) {
       const title = youtube[2] || "Embedded video";
@@ -766,7 +895,7 @@ function markdownToEditorHtml(markdown) {
       return `<blockquote>${inlineHtml(quote)}</blockquote>`;
     }
 
-    if (value.startsWith("{% gallery") || value.startsWith("{% video") || value.startsWith("<")) {
+    if (value.startsWith("{% video") || value.startsWith("<")) {
       return embedEditorHtml(value);
     }
 
@@ -1028,6 +1157,7 @@ els.postList.addEventListener("click", (event) => {
   loadSelectedPost(item.dataset.path).catch((error) => setStatus(error.message));
 });
 els.editor.addEventListener("keyup", handleMarkdownShortcut);
+els.editor.addEventListener("click", handleGalleryAction);
 els.editor.addEventListener("input", () => {
   checkDirtyState();
   updateToolbarState();
@@ -1040,7 +1170,7 @@ els.coverImageInput.addEventListener("change", (event) => {
   handleImageUpload(event).catch((error) => setStatus(error.message));
 });
 els.imageInput.addEventListener("change", (event) => {
-  uploadTarget = "inline";
+  if (uploadTarget !== "gallery") uploadTarget = "inline";
   handleImageUpload(event).catch((error) => setStatus(error.message));
 });
 els.publishPostButton.addEventListener("click", () => savePost().catch((error) => setStatus(error.message)));

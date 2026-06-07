@@ -1614,6 +1614,55 @@ figcaption {
   font-weight: 800;
 }
 
+.editor-gallery {
+  display: grid;
+  gap: 0.75rem;
+  margin: 2rem 0;
+}
+
+.editor-gallery__grid {
+  margin: 0;
+}
+
+.editor-gallery__item {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.editor-gallery__fields {
+  display: grid;
+  gap: 0.42rem;
+}
+
+.editor-gallery__fields label {
+  color: var(--muted);
+  display: grid;
+  font-family: var(--font-ui);
+  font-size: 0.68rem;
+  font-weight: 700;
+  gap: 0.2rem;
+}
+
+.editor-gallery__fields input {
+  background: color-mix(in srgb, var(--paper) 78%, var(--canvas));
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--ink);
+  font: 500 0.78rem/1.2 var(--font-ui);
+  padding: 0.42rem 0.5rem;
+}
+
+.editor-gallery__actions,
+.editor-gallery__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.editor-gallery__controls {
+  justify-content: flex-start;
+}
+
 .editor-body h1,
 .editor-body h2,
 .editor-body h3 {
