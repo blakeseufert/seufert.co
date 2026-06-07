@@ -3,7 +3,7 @@ layout: layouts/post.njk
 title: "It's Not Our Fault, But It Is Our Problem"
 date: 2026-05-28
 excerpt: "Vendor risk, cloud systems, and the gap between responsibility on paper and responsibility in practice."
-cover: "/assets/uploads/article-office.png"
+cover: "/assets/uploads/article-office.webp"
 coverAlt: "Illustrated office with a smoking server and an unavailable service screen"
 tags:
   - posts
@@ -43,7 +43,7 @@ The network we inherit is not the network we have to keep.
 
 It comes down to a fundamental shift in mindset. Instead of throwing our hands up, every technical issue needs to be reframed: it may not be our fault, but what role can we play to be part of the solution?
 
-{% gallery "/assets/uploads/article-office.png|A classroom-adjacent systems failure|When one link breaks, the user sees one system.", "/assets/uploads/chromebook-thumb.png|Chromebook detail|Hardware is visible; vendor risk often is not." %}
+{% gallery "/assets/uploads/article-office.webp|A classroom-adjacent systems failure|When one link breaks, the user sees one system.", "/assets/uploads/chromebook-thumb.png|Chromebook detail|Hardware is visible; vendor risk often is not." %}
 
 When evaluating a vendor, we have to own the consequences of that choice. If a platform erodes confidence through spotty updates, poor data practices, or security scares, the status quo is not neutral.
 
