@@ -950,7 +950,12 @@ figcaption {
   }
 
   .site-watermark {
-    background: linear-gradient(180deg, #aea198 0%, #f1eeec 100%);
+    background: linear-gradient(
+      180deg,
+      rgba(174, 161, 152, 0.36) 0%,
+      rgba(174, 161, 152, 0.18) 48%,
+      rgba(174, 161, 152, 0) 100%
+    );
     background-clip: text;
     color: transparent;
     display: block;
@@ -958,7 +963,7 @@ figcaption {
     font-size: 9.997rem;
     font-weight: 700;
     line-height: 0.95;
-    margin-top: 7rem;
+    margin-top: 9rem;
     overflow: hidden;
     white-space: nowrap;
   }
