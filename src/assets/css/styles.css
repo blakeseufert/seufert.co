@@ -255,13 +255,22 @@ button.pill {
   padding: 0.25rem 0.34rem;
 }
 
-.role-list__badge::before {
+.role-list__badge:not(:has(.role-list__badge-icon))::before {
   background: currentColor;
   border-radius: 2px;
   content: "";
   display: inline-block;
   height: 0.55rem;
   width: 0.55rem;
+}
+
+.role-list__badge-icon {
+  border-radius: 2px;
+  display: block;
+  flex: 0 0 auto;
+  height: 0.72rem;
+  object-fit: contain;
+  width: 0.72rem;
 }
 
 .role-list__badge--green {

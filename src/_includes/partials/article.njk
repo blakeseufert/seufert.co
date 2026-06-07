@@ -25,7 +25,12 @@
           {% if role.links %}
             <div class="role-list__links" aria-label="{{ role.org }} links">
               {% for link in role.links %}
-                <span class="pill pill--small role-list__badge role-list__badge--{{ link.tone }}">{{ link.label }}</span>
+                <span class="pill pill--small role-list__badge role-list__badge--{{ link.tone }}">
+                  {% if link.icon %}
+                    <img class="role-list__badge-icon" src="{{ link.icon }}" alt="" loading="lazy">
+                  {% endif %}
+                  {{ link.label }}
+                </span>
               {% endfor %}
             </div>
           {% endif %}
