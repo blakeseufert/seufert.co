@@ -195,6 +195,18 @@ textarea {
   cursor: pointer;
 }
 
+.pill--accent {
+  background: linear-gradient(180deg, var(--coral) 0%, #df8064 100%);
+  border-color: color-mix(in srgb, var(--coral) 62%, #df8064);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(222, 117, 130, 0.22);
+}
+
+.pill--accent:hover,
+.pill--accent:focus-visible {
+  filter: saturate(1.08) brightness(1.02);
+}
+
 .pill--danger {
   color: #a64758;
 }

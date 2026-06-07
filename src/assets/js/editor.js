@@ -18,7 +18,6 @@ const els = {
   authButton: document.querySelector("#authButton"),
   token: document.querySelector("#tokenInput"),
   tokenField: document.querySelector("#tokenField"),
-  signOutButton: document.querySelector("#signOutButton"),
   publishPostButton: document.querySelector("#publishPostButton"),
   refreshPostsButton: document.querySelector("#refreshPostsButton"),
   newPostButton: document.querySelector("#newPostButton"),
@@ -1049,7 +1048,6 @@ els.refreshPostsButton.addEventListener("click", () => loadPostList().catch((err
 els.newPostButton.addEventListener("click", () => {
   if (canDiscardChanges()) resetEditor();
 });
-els.signOutButton.addEventListener("click", signOut);
 els.authButton.addEventListener("click", () => {
   if (signedInUser) {
     signOut();
