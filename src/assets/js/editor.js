@@ -1,6 +1,13 @@
 const storageKey = "seufert-editor-config";
 const tokenKey = "seufert-editor-token";
-const defaultGithubClientId = document.querySelector('meta[name="github-oauth-client-id"]')?.content.trim() || "";
+const clientStorageKey = "seufert-editor-client-id";
+const editorConfig = {
+  owner: document.querySelector('meta[name="github-owner"]')?.content.trim() || "blakeseufert",
+  repo: document.querySelector('meta[name="github-repo"]')?.content.trim() || "seufert.co",
+  branch: document.querySelector('meta[name="github-branch"]')?.content.trim() || "main",
+  postsDir: normalizeDir(document.querySelector('meta[name="github-posts-dir"]')?.content || "src/posts"),
+  clientId: document.querySelector('meta[name="github-oauth-client-id"]')?.content.trim() || ""
+};
 const pendingImages = [];
 
 const els = {
@@ -8,7 +15,6 @@ const els = {
   editorApp: document.querySelector("#editorApp"),
   authButton: document.querySelector("#authButton"),
   signOutButton: document.querySelector("#signOutButton"),
-  saveConfigButton: document.querySelector("#saveConfigButton"),
   savePostButton: document.querySelector("#savePostButton"),
   refreshPostsButton: document.querySelector("#refreshPostsButton"),
   newPostButton: document.querySelector("#newPostButton"),
@@ -24,11 +30,6 @@ const els = {
   excerpt: document.querySelector("#excerptInput"),
   tags: document.querySelector("#tagsInput"),
   cover: document.querySelector("#coverInput"),
-  owner: document.querySelector("#ownerInput"),
-  repo: document.querySelector("#repoInput"),
-  branch: document.querySelector("#branchInput"),
-  postsDir: document.querySelector("#postsDirInput"),
-  client: document.querySelector("#clientInput")
 };
 
 const encoder = new TextEncoder();
@@ -73,31 +74,30 @@ function normalizeDir(value) {
 
 function getConfig() {
   return {
-    owner: els.owner.value.trim(),
-    repo: els.repo.value.trim(),
-    branch: els.branch.value.trim() || "main",
-    postsDir: normalizeDir(els.postsDir.value),
-    clientId: els.client.value.trim() || defaultGithubClientId
+    ...editorConfig,
+    clientId: localStorage.getItem(clientStorageKey) || editorConfig.clientId
   };
 }
 
 function saveConfig() {
   localStorage.setItem(storageKey, JSON.stringify(getConfig()));
-  setStatus("Settings saved.");
 }
 
 function loadConfig() {
   els.date.value = new Date().toISOString().slice(0, 10);
 
   try {
-    const config = JSON.parse(localStorage.getItem(storageKey) || "{}");
-    els.owner.value = config.owner || els.owner.value || "";
-    els.repo.value = config.repo || els.repo.value || "";
-    els.branch.value = config.branch || els.branch.value || "main";
-    els.postsDir.value = config.postsDir || els.postsDir.value || "src/posts";
-    els.client.value = config.clientId || defaultGithubClientId;
+    const params = new URLSearchParams(window.location.search);
+    const clientId = params.get("client_id") || params.get("github_client_id");
+    if (clientId) {
+      localStorage.setItem(clientStorageKey, clientId.trim());
+      params.delete("client_id");
+      params.delete("github_client_id");
+      const cleanUrl = `${window.location.pathname}${params.toString() ? `?${params}` : ""}${window.location.hash}`;
+      window.history.replaceState({}, "", cleanUrl);
+    }
   } catch {
-    setStatus("Settings could not be loaded.");
+    setStatus("Editor settings could not be loaded.");
   }
 }
 
@@ -225,6 +225,9 @@ function showAuthGate() {
   els.editorApp.hidden = true;
   els.editorUser.hidden = true;
   els.authButton.textContent = "Sign in with GitHub";
+  if (!getConfig().clientId) {
+    setStatus("GitHub sign-in needs the OAuth client ID in the editor page metadata.");
+  }
 }
 
 function showEditor() {
@@ -238,8 +241,7 @@ function showEditor() {
 async function startDeviceAuth() {
   const { clientId } = getConfig();
   if (!clientId) {
-    document.querySelector(".auth-settings")?.setAttribute("open", "");
-    setStatus("Add the GitHub OAuth client ID once in Connection settings.");
+    setStatus("GitHub sign-in is not configured yet. Add the OAuth client ID to the editor page metadata.");
     return;
   }
 
@@ -829,10 +831,6 @@ els.slug.addEventListener("input", () => {
 els.postSelect.addEventListener("change", () => loadSelectedPost().catch((error) => setStatus(error.message)));
 els.editor.addEventListener("keyup", handleMarkdownShortcut);
 els.imageInput.addEventListener("change", (event) => handleImageUpload(event).catch((error) => setStatus(error.message)));
-els.saveConfigButton.addEventListener("click", () => {
-  saveConfig();
-  if (!els.editorApp.hidden) loadPostList().catch((error) => setStatus(error.message));
-});
 els.savePostButton.addEventListener("click", () => savePost().catch((error) => setStatus(error.message)));
 els.refreshPostsButton.addEventListener("click", () => loadPostList().catch((error) => setStatus(error.message)));
 els.newPostButton.addEventListener("click", resetEditor);
