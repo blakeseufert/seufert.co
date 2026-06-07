@@ -516,6 +516,35 @@ button.pill {
   margin: 2rem 0;
 }
 
+.post-image-zoom {
+  cursor: zoom-in;
+}
+
+.image-lightbox {
+  align-items: center;
+  background: rgba(31, 29, 28, 0.72);
+  cursor: zoom-out;
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: clamp(1rem, 3vw, 2.5rem);
+  position: fixed;
+  z-index: 100;
+}
+
+.image-lightbox[hidden] {
+  display: none;
+}
+
+.image-lightbox__image {
+  border-radius: var(--radius);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.32);
+  cursor: default;
+  max-height: 92vh;
+  max-width: 94vw;
+  object-fit: contain;
+}
+
 .post-body blockquote,
 .quote {
   border: 0;

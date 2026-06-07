@@ -48,4 +48,51 @@ function closeShareClusters() {
   });
 }
 
+function setupPostImageLightbox() {
+  const images = document.querySelectorAll(".post-body img");
+  if (!images.length) return;
+
+  const lightbox = document.createElement("div");
+  lightbox.className = "image-lightbox";
+  lightbox.hidden = true;
+  lightbox.innerHTML = '<img class="image-lightbox__image" alt="">';
+  document.body.append(lightbox);
+
+  const lightboxImage = lightbox.querySelector("img");
+
+  function closeLightbox() {
+    if (lightbox.hidden) return;
+    lightbox.hidden = true;
+    lightboxImage.removeAttribute("src");
+    lightboxImage.alt = "";
+    document.body.classList.remove("image-lightbox-open");
+    window.removeEventListener("scroll", closeLightbox);
+  }
+
+  function openLightbox(image) {
+    lightboxImage.src = image.currentSrc || image.src;
+    lightboxImage.alt = image.alt || "";
+    lightbox.hidden = false;
+    document.body.classList.add("image-lightbox-open");
+    window.addEventListener("scroll", closeLightbox, { passive: true });
+  }
+
+  images.forEach((image) => {
+    image.classList.add("post-image-zoom");
+    image.addEventListener("click", (event) => {
+      if (event.target.closest("a")) return;
+      openLightbox(image);
+    });
+  });
+
+  lightbox.addEventListener("click", (event) => {
+    if (event.target === lightbox) closeLightbox();
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeLightbox();
+  });
+}
+
 setupShareLinks();
+setupPostImageLightbox();
