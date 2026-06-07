@@ -1,5 +1,6 @@
 const storageKey = "seufert-editor-config";
 const tokenKey = "seufert-editor-token";
+const defaultGithubClientId = document.querySelector('meta[name="github-oauth-client-id"]')?.content.trim() || "";
 const pendingImages = [];
 
 const els = {
@@ -76,7 +77,7 @@ function getConfig() {
     repo: els.repo.value.trim(),
     branch: els.branch.value.trim() || "main",
     postsDir: normalizeDir(els.postsDir.value),
-    clientId: els.client.value.trim()
+    clientId: els.client.value.trim() || defaultGithubClientId
   };
 }
 
@@ -94,7 +95,7 @@ function loadConfig() {
     els.repo.value = config.repo || els.repo.value || "";
     els.branch.value = config.branch || els.branch.value || "main";
     els.postsDir.value = config.postsDir || els.postsDir.value || "src/posts";
-    els.client.value = config.clientId || "";
+    els.client.value = config.clientId || defaultGithubClientId;
   } catch {
     setStatus("Settings could not be loaded.");
   }
@@ -243,7 +244,8 @@ async function startDeviceAuth() {
   }
 
   saveConfig();
-  setStatus("Requesting GitHub code...");
+  const authWindow = window.open("", "github-oauth", "popup,width=640,height=760");
+  setStatus("Opening GitHub sign-in...");
 
   const deviceResponse = await fetch("https://github.com/login/device/code", {
     method: "POST",
@@ -262,8 +264,14 @@ async function startDeviceAuth() {
   }
 
   const device = await deviceResponse.json();
-  window.open(device.verification_uri, "_blank", "noopener,noreferrer");
-  setStatus(`Enter ${device.user_code} in the GitHub tab.`);
+  const authUrl = device.verification_uri_complete || device.verification_uri;
+  if (authWindow) {
+    authWindow.location.href = authUrl;
+    authWindow.focus();
+  } else {
+    window.open(authUrl, "_blank", "noopener,noreferrer");
+  }
+  setStatus(device.verification_uri_complete ? "Complete GitHub sign-in in the window that opened." : `Enter ${device.user_code} in the GitHub tab.`);
 
   const startedAt = Date.now();
   let intervalMs = (device.interval || 5) * 1000;

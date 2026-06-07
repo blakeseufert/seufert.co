@@ -8,6 +8,7 @@ permalink: /editor/
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Editor | seufert.co</title>
     <meta name="theme-color" content="#efede9">
+    <meta name="github-oauth-client-id" content="">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sura:wght@400;700&display=swap" rel="stylesheet">
@@ -33,7 +34,7 @@ permalink: /editor/
           <label>Repo <input id="repoInput" value="seufert.co" autocomplete="off"></label>
           <label>Branch <input id="branchInput" value="main" autocomplete="off"></label>
           <label>Posts directory <input id="postsDirInput" value="src/posts" autocomplete="off"></label>
-          <label>OAuth client ID <input id="clientInput" autocomplete="off"></label>
+          <label>OAuth client ID <input id="clientInput" autocomplete="off" placeholder="Only needed if the editor default is empty"></label>
           <button class="pill pill--button" id="saveConfigButton" type="button">Save settings</button>
         </details>
         <p class="status-line" id="statusLine"></p>
