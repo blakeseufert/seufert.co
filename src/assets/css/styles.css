@@ -293,6 +293,7 @@ button.pill {
   font-size: 0.5rem;
   min-height: 1rem;
   padding: 0.25rem 0.34rem;
+  text-decoration: none;
 }
 
 .role-list__badge:not(:has(.role-list__badge-icon))::before {

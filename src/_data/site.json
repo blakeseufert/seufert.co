@@ -4,7 +4,7 @@
   "author": "Blake Seufert",
   "tagline": "Building lasting, high quality systems and technology",
   "description": "Writing on technology, education systems, risk, and sustainable digital operations.",
-  "assetVersion": "20260607-local-post-manifest",
+  "assetVersion": "20260608-role-pill-links",
   "profileImage": "/assets/uploads/blake-profile.webp",
   "bio": "Blake has worked with major companies like Google and Microsoft, as well as over 100 schools and school groups in Australia. He has spoken at conferences and been published in top publications.",
   "social": [
@@ -31,6 +31,7 @@
       "links": [
         {
           "label": "IT at McKinnon",
+          "url": "https://selfserve.mckinnonsc.vic.edu.au/",
           "icon": "/assets/uploads/icons/mckinnon.png",
           "tone": "blue"
         }
@@ -42,11 +43,13 @@
       "links": [
         {
           "label": "iNewsletter",
+          "url": "http://inewsletter.co/",
           "icon": "/assets/uploads/icons/inewsletter.png",
           "tone": "green"
         },
         {
           "label": "Naavi Sites",
+          "url": "https://sites.naavi.com/",
           "icon": "/assets/uploads/icons/naavi-sites.png",
           "tone": "blue"
         }
@@ -58,6 +61,7 @@
       "links": [
         {
           "label": "Confidence Framework",
+          "url": "https://www.coet.edu.au/member-resources/confidence",
           "icon": "/assets/uploads/icons/coet.png",
           "tone": "coral"
         }
