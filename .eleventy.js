@@ -1,3 +1,17 @@
+function normalizeBasePath(value) {
+  const raw = String(value || "/").trim();
+  if (!raw || raw === "/") return "/";
+  return `/${raw.replace(/^\/+|\/+$/g, "")}/`;
+}
+
+const basePath = normalizeBasePath(process.env.BASE_PATH);
+
+function withBasePath(url) {
+  if (!url || !url.startsWith("/") || url.startsWith("//") || basePath === "/") return url;
+  if (url === basePath.slice(0, -1) || url.startsWith(basePath)) return url;
+  return `${basePath.slice(0, -1)}${url}`;
+}
+
 module.exports = function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy({ "src/assets": "assets" });
 
@@ -21,6 +35,16 @@ module.exports = function (eleventyConfig) {
 
   eleventyConfig.addFilter("firstPost", (posts) => posts && posts[0]);
 
+  eleventyConfig.addFilter("withBasePath", withBasePath);
+
+  eleventyConfig.addTransform("prefixRootRelativeUrls", function (content) {
+    if (!this.page.outputPath || !this.page.outputPath.endsWith(".html")) return content;
+
+    return content.replace(/\b(href|src|action)=(")(\/(?!\/)[^"]*)(")/g, (_match, attr, open, url, close) => {
+      return `${attr}=${open}${withBasePath(url)}${close}`;
+    });
+  });
+
   eleventyConfig.addShortcode("youtube", (id, title = "Embedded video") => {
     const safeTitle = String(title).replace(/"/g, "&quot;");
     return `<figure class="media-embed"><iframe src="https://www.youtube-nocookie.com/embed/${id}" title="${safeTitle}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe><figcaption>${safeTitle}</figcaption></figure>`;
@@ -36,7 +60,7 @@ module.exports = function (eleventyConfig) {
       .filter(Boolean)
       .map((item) => {
         const [src, alt = "", caption = ""] = String(item).split("|");
-        return `<figure><img src="${src}" alt="${alt}" loading="lazy">${caption ? `<figcaption>${caption}</figcaption>` : ""}</figure>`;
+        return `<figure><img src="${withBasePath(src)}" alt="${alt}" loading="lazy">${caption ? `<figcaption>${caption}</figcaption>` : ""}</figure>`;
       })
       .join("");
 

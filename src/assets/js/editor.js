@@ -8,6 +8,7 @@ const editorConfig = {
   postsDir: normalizeDir(document.querySelector('meta[name="github-posts-dir"]')?.content || "src/posts"),
   clientId: document.querySelector('meta[name="github-oauth-client-id"]')?.content.trim() || ""
 };
+const siteBasePath = document.querySelector('meta[name="site-base-path"]')?.content.trim() || "/";
 const pendingImages = [];
 
 const els = {
@@ -70,6 +71,13 @@ function textFromBase64(value) {
 
 function normalizeDir(value) {
   return String(value || "src/posts").trim().replace(/^\/+|\/+$/g, "") || "src/posts";
+}
+
+function publicUrl(path) {
+  if (!path || !path.startsWith("/") || path.startsWith("//")) return path;
+  const cleanBase = siteBasePath === "/" ? "" : siteBasePath.replace(/\/$/, "");
+  if (cleanBase && path.startsWith(`${cleanBase}/`)) return path;
+  return `${cleanBase}${path}`;
 }
 
 function getConfig() {
@@ -633,7 +641,7 @@ function markdownToEditorHtml(markdown) {
     }
 
     if (image) {
-      return `<img src="${escapeHtml(image[2])}" alt="${escapeHtml(image[1])}" data-md-src="${escapeHtml(image[2])}">`;
+      return `<img src="${escapeHtml(publicUrl(image[2]))}" alt="${escapeHtml(image[1])}" data-md-src="${escapeHtml(image[2])}">`;
     }
 
     if (value.startsWith("### ")) return `<h3>${inlineHtml(value.slice(4))}</h3>`;
