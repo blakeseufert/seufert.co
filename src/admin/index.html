@@ -16,7 +16,7 @@ permalink: /editor/
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sura:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/assets/css/styles.css">
+    <link rel="stylesheet" href="/assets/css/styles.css?v={{ site.assetVersion }}">
   </head>
   <body>
     <header class="topbar">
@@ -66,6 +66,7 @@ permalink: /editor/
       <section class="compose-shell" aria-label="Editor">
         <div class="compose-topline">
           <label class="inline-date">Date <input id="dateInput" type="date"></label>
+          <span class="dirty-state" id="dirtyState" hidden>Unpublished changes</span>
           <button class="pill pill--button" id="publishPostButton" type="button">Publish</button>
         </div>
 
@@ -96,6 +97,6 @@ permalink: /editor/
       </section>
     </main>
 
-    <script src="/assets/js/editor.js"></script>
+    <script src="/assets/js/editor.js?v={{ site.assetVersion }}"></script>
   </body>
 </html>

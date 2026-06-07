@@ -1120,6 +1120,10 @@ figcaption {
   border-color: var(--line);
 }
 
+.post-list__item--dirty {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
+}
+
 .post-list__title {
   font-family: var(--font-display);
   font-size: 0.92rem;
@@ -1144,6 +1148,13 @@ figcaption {
   padding-inline: 0.25rem;
 }
 
+.dirty-state {
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 800;
+  margin-left: auto;
+}
+
 .inline-date {
   align-items: center;
   color: var(--muted);
@@ -1163,6 +1174,9 @@ figcaption {
 }
 
 .compose-canvas {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
   display: grid;
   gap: 1rem;
   min-height: 78vh;
@@ -1200,6 +1214,10 @@ figcaption {
   width: 100%;
 }
 
+.cover-preview[hidden] {
+  display: none;
+}
+
 .editor-actions,
 .editor-toolbar {
   display: flex;
@@ -1218,6 +1236,12 @@ figcaption {
   position: sticky;
   top: 0.75rem;
   z-index: 2;
+}
+
+.editor-toolbar .pill--active {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
 }
 
 .editor-canvas {

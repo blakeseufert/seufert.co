@@ -23,6 +23,7 @@ const els = {
   coverButtonText: document.querySelector("#coverButtonText"),
   coverPreview: document.querySelector("#coverPreview"),
   imageInput: document.querySelector("#imageInput"),
+  dirtyState: document.querySelector("#dirtyState"),
   status: document.querySelector("#statusLine"),
   editorUser: document.querySelector("#editorUser"),
   editor: document.querySelector("#editorCanvas"),
@@ -37,6 +38,8 @@ let posts = [];
 let currentPost = null;
 let signedInUser = null;
 let uploadTarget = "inline";
+let lastCleanSnapshot = "";
+let isDirty = false;
 
 function setStatus(message) {
   els.status.textContent = message;
@@ -70,7 +73,47 @@ function currentSlug() {
 }
 
 function setPublishLabel() {
-  els.publishPostButton.textContent = currentPost ? "Update" : "Publish";
+  const action = currentPost ? "Update" : "Publish";
+  els.publishPostButton.textContent = isDirty ? `${action} *` : action;
+}
+
+function editorSnapshot() {
+  return JSON.stringify({
+    title: getTitle(),
+    date: els.date.value || today(),
+    cover: coverPath(),
+    body: editorMarkdown()
+  });
+}
+
+function setCleanState() {
+  lastCleanSnapshot = editorSnapshot();
+  isDirty = false;
+  updateDirtyState();
+}
+
+function checkDirtyState() {
+  const nextDirty = editorSnapshot() !== lastCleanSnapshot;
+  if (nextDirty === isDirty) {
+    setPublishLabel();
+    return;
+  }
+  isDirty = nextDirty;
+  updateDirtyState();
+}
+
+function updateDirtyState() {
+  els.editorApp.classList.toggle("editor-app--dirty", isDirty);
+  els.dirtyState.hidden = !isDirty;
+  if (isDirty) {
+    els.dirtyState.textContent = currentPost ? "Unpublished edits" : "Unpublished draft";
+  }
+  setPublishLabel();
+  renderPostList();
+}
+
+function canDiscardChanges() {
+  return !isDirty || confirm("You have unpublished changes. Discard them?");
 }
 
 function base64FromText(value) {
@@ -311,6 +354,9 @@ function runCommand(command) {
     const input = prompt("YouTube URL, iframe, or embed HTML");
     if (input) insertEmbed(input);
   }
+
+  checkDirtyState();
+  updateToolbarState();
 }
 
 function insertEmbed(input) {
@@ -352,6 +398,33 @@ function currentBlock() {
     node = node.parentElement;
   }
   return node;
+}
+
+function isSelectionInEditor() {
+  const selection = window.getSelection();
+  if (!selection || !selection.anchorNode) return false;
+  const node = selection.anchorNode.nodeType === Node.TEXT_NODE ? selection.anchorNode.parentElement : selection.anchorNode;
+  return node === els.editor || els.editor.contains(node);
+}
+
+function updateToolbarState() {
+  if (!isSelectionInEditor()) return;
+
+  const block = currentBlock();
+  const blockTag = block?.tagName?.toLowerCase() || "";
+  const inBlockquote = block?.tagName === "BLOCKQUOTE";
+  const commandStates = {
+    bold: document.queryCommandState("bold"),
+    ul: document.queryCommandState("insertUnorderedList"),
+    h2: blockTag === "h2",
+    h3: blockTag === "h3",
+    quote: inBlockquote && !block.classList.contains("quote--pull"),
+    pullquote: inBlockquote && block.classList.contains("quote--pull")
+  };
+
+  document.querySelectorAll("[data-command]").forEach((button) => {
+    button.classList.toggle("pill--active", Boolean(commandStates[button.dataset.command]));
+  });
 }
 
 function replaceBlock(block, replacement) {
@@ -465,6 +538,7 @@ async function handleImageUpload(event) {
     insertInlineImage(dataUrl, extensionPath);
   }
 
+  checkDirtyState();
   setStatus(`Queued ${file.name}.`);
   event.target.value = "";
   uploadTarget = "inline";
@@ -668,8 +742,7 @@ function resetEditor() {
   els.date.value = today();
   setCoverPreview();
   els.editor.innerHTML = "<p>Start writing...</p>";
-  renderPostList();
-  setPublishLabel();
+  setCleanState();
   setStatus("New post ready.");
 }
 
@@ -696,6 +769,7 @@ function renderPostList() {
     if (currentPost && currentPost.path === post.path) {
       button.classList.add("post-list__item--active");
       button.setAttribute("aria-current", "true");
+      if (isDirty) button.classList.add("post-list__item--dirty");
     }
 
     const title = document.createElement("span");
@@ -704,7 +778,9 @@ function renderPostList() {
 
     const meta = document.createElement("span");
     meta.className = "post-list__meta";
-    meta.textContent = post.data.date || "No date";
+    meta.textContent = currentPost && currentPost.path === post.path && isDirty
+      ? `${post.data.date || "No date"} - unpublished edits`
+      : post.data.date || "No date";
 
     button.append(title, meta);
     els.postList.append(button);
@@ -774,8 +850,7 @@ async function loadSelectedPost(path) {
   els.date.value = post.data.date || today();
   setCoverPreview(post.data.cover ? publicUrl(post.data.cover) : "", post.data.cover || "");
   els.editor.innerHTML = markdownToEditorHtml(post.body);
-  renderPostList();
-  setPublishLabel();
+  setCleanState();
   setStatus(`Editing ${post.name}.`);
 }
 
@@ -799,8 +874,7 @@ async function savePost() {
 
   await loadPostList();
   currentPost = posts.find((post) => post.path === newPath) || null;
-  renderPostList();
-  setPublishLabel();
+  setCleanState();
   setStatus(`${wasUpdate ? "Post updated" : "Post published"}. GitHub Pages will rebuild on push.`);
 }
 
@@ -833,9 +907,18 @@ els.title.addEventListener("keydown", (event) => {
 els.postList.addEventListener("click", (event) => {
   const item = event.target.closest("[data-path]");
   if (!item) return;
+  if (currentPost && currentPost.path === item.dataset.path) return;
+  if (!canDiscardChanges()) return;
   loadSelectedPost(item.dataset.path).catch((error) => setStatus(error.message));
 });
 els.editor.addEventListener("keyup", handleMarkdownShortcut);
+els.editor.addEventListener("input", () => {
+  checkDirtyState();
+  updateToolbarState();
+});
+els.editor.addEventListener("mouseup", updateToolbarState);
+els.title.addEventListener("input", checkDirtyState);
+els.date.addEventListener("input", checkDirtyState);
 els.coverImageInput.addEventListener("change", (event) => {
   uploadTarget = "cover";
   handleImageUpload(event).catch((error) => setStatus(error.message));
@@ -846,10 +929,13 @@ els.imageInput.addEventListener("change", (event) => {
 });
 els.publishPostButton.addEventListener("click", () => savePost().catch((error) => setStatus(error.message)));
 els.refreshPostsButton.addEventListener("click", () => loadPostList().catch((error) => setStatus(error.message)));
-els.newPostButton.addEventListener("click", resetEditor);
+els.newPostButton.addEventListener("click", () => {
+  if (canDiscardChanges()) resetEditor();
+});
 els.deletePostButton.addEventListener("click", () => deleteCurrentPost().catch((error) => setStatus(error.message)));
 els.signOutButton.addEventListener("click", signOut);
 els.authButton.addEventListener("click", () => connectToken().catch((error) => setStatus(error.message)));
+document.addEventListener("selectionchange", updateToolbarState);
 
 loadConfig();
 validateSession();
