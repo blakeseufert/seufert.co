@@ -6,6 +6,7 @@ const editorConfig = {
   postsDir: normalizeDir(document.querySelector('meta[name="github-posts-dir"]')?.content || "src/posts")
 };
 const siteBasePath = document.querySelector('meta[name="site-base-path"]')?.content.trim() || "/";
+const defaultCoverPath = "/assets/uploads/article-office.webp";
 const pendingImages = [];
 
 const els = {
@@ -14,29 +15,28 @@ const els = {
   authButton: document.querySelector("#authButton"),
   token: document.querySelector("#tokenInput"),
   signOutButton: document.querySelector("#signOutButton"),
-  savePostButton: document.querySelector("#savePostButton"),
+  publishPostButton: document.querySelector("#publishPostButton"),
   refreshPostsButton: document.querySelector("#refreshPostsButton"),
   newPostButton: document.querySelector("#newPostButton"),
   deletePostButton: document.querySelector("#deletePostButton"),
+  coverImageInput: document.querySelector("#coverImageInput"),
+  coverButtonText: document.querySelector("#coverButtonText"),
+  coverPreview: document.querySelector("#coverPreview"),
   imageInput: document.querySelector("#imageInput"),
   status: document.querySelector("#statusLine"),
   editorUser: document.querySelector("#editorUser"),
   editor: document.querySelector("#editorCanvas"),
-  postSelect: document.querySelector("#postSelect"),
+  postList: document.querySelector("#postList"),
   title: document.querySelector("#titleInput"),
-  slug: document.querySelector("#slugInput"),
-  date: document.querySelector("#dateInput"),
-  excerpt: document.querySelector("#excerptInput"),
-  tags: document.querySelector("#tagsInput"),
-  cover: document.querySelector("#coverInput"),
+  date: document.querySelector("#dateInput")
 };
 
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
-let slugWasEdited = false;
 let posts = [];
 let currentPost = null;
 let signedInUser = null;
+let uploadTarget = "inline";
 
 function setStatus(message) {
   els.status.textContent = message;
@@ -50,6 +50,27 @@ function slugify(value) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .slice(0, 80) || "untitled-note";
+}
+
+function today() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function getTitle() {
+  return els.title.textContent.trim() || "Untitled note";
+}
+
+function setTitle(value) {
+  els.title.textContent = value || "Untitled note";
+}
+
+function currentSlug() {
+  if (currentPost) return slugify(currentPost.name.replace(/\.md$/, ""));
+  return slugify(getTitle());
+}
+
+function setPublishLabel() {
+  els.publishPostButton.textContent = currentPost ? "Update" : "Publish";
 }
 
 function base64FromText(value) {
@@ -85,7 +106,7 @@ function getConfig() {
 }
 
 function loadConfig() {
-  els.date.value = new Date().toISOString().slice(0, 10);
+  els.date.value = today();
 
   try {
     const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
@@ -210,6 +231,9 @@ async function validateSession() {
     signedInUser = await response.json();
     showEditor();
     await loadPostList();
+    if (posts.length && !currentPost) {
+      await loadSelectedPost(posts[0].path);
+    }
   } catch (error) {
     localStorage.removeItem(tokenKey);
     signedInUser = null;
@@ -388,12 +412,45 @@ function readFileAsDataUrl(file) {
   });
 }
 
+function setCoverPreview(src = "", mdSrc = "") {
+  if (!src && !mdSrc) {
+    els.coverPreview.hidden = true;
+    els.coverPreview.removeAttribute("src");
+    delete els.coverPreview.dataset.mdSrc;
+    els.coverButtonText.textContent = "Add image";
+    return;
+  }
+
+  els.coverPreview.src = src || publicUrl(mdSrc);
+  els.coverPreview.dataset.mdSrc = mdSrc || src;
+  els.coverPreview.hidden = false;
+  els.coverButtonText.textContent = "Change image";
+}
+
+function firstInlineImagePath() {
+  const image = els.editor.querySelector("img[data-md-src]");
+  return image?.dataset.mdSrc || "";
+}
+
+function coverPath() {
+  return els.coverPreview.dataset.mdSrc || firstInlineImagePath() || defaultCoverPath;
+}
+
+function insertInlineImage(dataUrl, publicPath) {
+  els.editor.focus();
+  document.execCommand(
+    "insertHTML",
+    false,
+    `<img src="${dataUrl}" alt="" data-md-src="${publicPath}"><p><br></p>`
+  );
+}
+
 async function handleImageUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
 
   const dataUrl = await readFileAsDataUrl(file);
-  const extensionPath = `/assets/uploads/${slugify(els.slug.value)}-${safeFileName(file.name)}`;
+  const extensionPath = `/assets/uploads/${currentSlug()}-${safeFileName(file.name)}`;
   const [, base64Content] = String(dataUrl).split(",");
 
   pendingImages.push({
@@ -402,18 +459,15 @@ async function handleImageUpload(event) {
     base64Content
   });
 
-  if (!els.cover.value) {
-    els.cover.value = extensionPath;
+  if (uploadTarget === "cover") {
+    setCoverPreview(dataUrl, extensionPath);
+  } else {
+    insertInlineImage(dataUrl, extensionPath);
   }
-
-  document.execCommand(
-    "insertHTML",
-    false,
-    `<img src="${dataUrl}" alt="" data-md-src="${extensionPath}"><p><br></p>`
-  );
 
   setStatus(`Queued ${file.name}.`);
   event.target.value = "";
+  uploadTarget = "inline";
 }
 
 function inlineMarkdown(node) {
@@ -521,22 +575,31 @@ function parseFrontmatter(markdown) {
   return { data, body: match[2].trim() };
 }
 
-function frontmatter() {
-  const tags = els.tags.value
-    .split(",")
-    .map((tag) => tag.trim())
-    .filter(Boolean);
+function plainEditorText() {
+  return Array.from(els.editor.children)
+    .map((node) => node.textContent.trim())
+    .filter(Boolean)
+    .join(" ");
+}
 
+function excerptText() {
+  return plainEditorText().replace(/\s+/g, " ").slice(0, 180);
+}
+
+function publishDate() {
+  if (!els.date.value) els.date.value = today();
+  return els.date.value;
+}
+
+function frontmatter() {
   const lines = [
     "---",
     "layout: layouts/post.njk",
-    `title: ${yamlString(els.title.value)}`,
-    `date: ${els.date.value}`,
-    `excerpt: ${yamlString(els.excerpt.value)}`,
-    `cover: ${yamlString(els.cover.value)}`,
-    "tags:",
-    "  - posts",
-    ...tags.map((tag) => `  - ${yamlString(tag)}`),
+    `title: ${yamlString(getTitle())}`,
+    `date: ${publishDate()}`,
+    `excerpt: ${yamlString(excerptText())}`,
+    `cover: ${yamlString(coverPath())}`,
+    `coverAlt: ${yamlString(getTitle())}`,
     "---"
   ];
 
@@ -601,15 +664,12 @@ function markdownToEditorHtml(markdown) {
 function resetEditor() {
   currentPost = null;
   pendingImages.splice(0);
-  slugWasEdited = false;
-  els.title.value = "Untitled note";
-  els.slug.value = "untitled-note";
-  els.date.value = new Date().toISOString().slice(0, 10);
-  els.excerpt.value = "";
-  els.tags.value = "Systems, Notes";
-  els.cover.value = "";
-  els.editor.innerHTML = "<p>Start with a short opening paragraph. The public post layout will automatically apply the drop cap.</p>";
-  els.postSelect.value = "";
+  setTitle("Untitled note");
+  els.date.value = today();
+  setCoverPreview();
+  els.editor.innerHTML = "<p>Start writing...</p>";
+  renderPostList();
+  setPublishLabel();
   setStatus("New post ready.");
 }
 
@@ -618,21 +678,37 @@ function postPathFromSlug(slug) {
 }
 
 function renderPostList() {
-  els.postSelect.innerHTML = "";
+  els.postList.innerHTML = "";
 
-  const placeholder = document.createElement("option");
-  placeholder.value = "";
-  placeholder.textContent = posts.length ? "Select a post..." : "No posts found";
-  els.postSelect.append(placeholder);
+  if (!posts.length) {
+    const empty = document.createElement("p");
+    empty.className = "post-list__empty";
+    empty.textContent = "No posts found.";
+    els.postList.append(empty);
+    return;
+  }
 
   posts.forEach((post) => {
-    const option = document.createElement("option");
-    option.value = post.path;
-    option.textContent = `${post.data.date || "No date"} - ${post.data.title || post.name}`;
-    els.postSelect.append(option);
-  });
+    const button = document.createElement("button");
+    button.className = "post-list__item";
+    button.type = "button";
+    button.dataset.path = post.path;
+    if (currentPost && currentPost.path === post.path) {
+      button.classList.add("post-list__item--active");
+      button.setAttribute("aria-current", "true");
+    }
 
-  if (currentPost) els.postSelect.value = currentPost.path;
+    const title = document.createElement("span");
+    title.className = "post-list__title";
+    title.textContent = post.data.title || post.name.replace(/\.md$/, "");
+
+    const meta = document.createElement("span");
+    meta.className = "post-list__meta";
+    meta.textContent = post.data.date || "No date";
+
+    button.append(title, meta);
+    els.postList.append(button);
+  });
 }
 
 async function loadPostList() {
@@ -672,8 +748,7 @@ async function loadPostList() {
   setStatus(`Loaded ${posts.length} post${posts.length === 1 ? "" : "s"}.`);
 }
 
-async function loadSelectedPost() {
-  const path = els.postSelect.value;
+async function loadSelectedPost(path) {
   if (!path) return;
 
   let post = posts.find((item) => item.path === path);
@@ -695,21 +770,18 @@ async function loadSelectedPost() {
 
   currentPost = post;
   pendingImages.splice(0);
-  slugWasEdited = true;
-  els.title.value = post.data.title || "";
-  els.slug.value = slugify(post.name.replace(/\.md$/, ""));
-  els.date.value = post.data.date || new Date().toISOString().slice(0, 10);
-  els.excerpt.value = post.data.excerpt || "";
-  els.tags.value = (post.data.tags || []).join(", ");
-  els.cover.value = post.data.cover || "";
+  setTitle(post.data.title || post.name.replace(/\.md$/, ""));
+  els.date.value = post.data.date || today();
+  setCoverPreview(post.data.cover ? publicUrl(post.data.cover) : "", post.data.cover || "");
   els.editor.innerHTML = markdownToEditorHtml(post.body);
-  els.postSelect.value = post.path;
+  renderPostList();
+  setPublishLabel();
   setStatus(`Editing ${post.name}.`);
 }
 
 async function savePost() {
-  const slug = slugify(els.slug.value);
-  els.slug.value = slug;
+  const slug = currentSlug();
+  const wasUpdate = Boolean(currentPost);
 
   setStatus("Uploading images...");
   for (const image of pendingImages.splice(0)) {
@@ -719,7 +791,7 @@ async function savePost() {
   setStatus("Saving post...");
   const markdown = `${frontmatter()}\n\n${editorMarkdown()}\n`;
   const newPath = postPathFromSlug(slug);
-  await putFile(newPath, base64FromText(markdown), `${currentPost ? "Update" : "Publish"} ${els.title.value}`);
+  await putFile(newPath, base64FromText(markdown), `${wasUpdate ? "Update" : "Publish"} ${getTitle()}`);
 
   if (currentPost && currentPost.path !== newPath) {
     await deleteFile(currentPost.path, currentPost.sha, `Remove renamed post ${currentPost.name}`);
@@ -728,7 +800,8 @@ async function savePost() {
   await loadPostList();
   currentPost = posts.find((post) => post.path === newPath) || null;
   renderPostList();
-  setStatus("Post saved. GitHub Pages will rebuild on push.");
+  setPublishLabel();
+  setStatus(`${wasUpdate ? "Post updated" : "Post published"}. GitHub Pages will rebuild on push.`);
 }
 
 async function deleteCurrentPost() {
@@ -751,20 +824,27 @@ document.querySelectorAll("[data-command]").forEach((button) => {
   button.addEventListener("click", () => runCommand(button.dataset.command));
 });
 
-els.title.addEventListener("input", () => {
-  if (!slugWasEdited) {
-    els.slug.value = slugify(els.title.value);
-  }
+els.title.addEventListener("input", setPublishLabel);
+els.title.addEventListener("keydown", (event) => {
+  if (event.key !== "Enter") return;
+  event.preventDefault();
+  els.editor.focus();
 });
-
-els.slug.addEventListener("input", () => {
-  slugWasEdited = true;
+els.postList.addEventListener("click", (event) => {
+  const item = event.target.closest("[data-path]");
+  if (!item) return;
+  loadSelectedPost(item.dataset.path).catch((error) => setStatus(error.message));
 });
-
-els.postSelect.addEventListener("change", () => loadSelectedPost().catch((error) => setStatus(error.message)));
 els.editor.addEventListener("keyup", handleMarkdownShortcut);
-els.imageInput.addEventListener("change", (event) => handleImageUpload(event).catch((error) => setStatus(error.message)));
-els.savePostButton.addEventListener("click", () => savePost().catch((error) => setStatus(error.message)));
+els.coverImageInput.addEventListener("change", (event) => {
+  uploadTarget = "cover";
+  handleImageUpload(event).catch((error) => setStatus(error.message));
+});
+els.imageInput.addEventListener("change", (event) => {
+  uploadTarget = "inline";
+  handleImageUpload(event).catch((error) => setStatus(error.message));
+});
+els.publishPostButton.addEventListener("click", () => savePost().catch((error) => setStatus(error.message)));
 els.refreshPostsButton.addEventListener("click", () => loadPostList().catch((error) => setStatus(error.message)));
 els.newPostButton.addEventListener("click", resetEditor);
 els.deletePostButton.addEventListener("click", () => deleteCurrentPost().catch((error) => setStatus(error.message)));

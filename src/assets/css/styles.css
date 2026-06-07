@@ -951,11 +951,11 @@ figcaption {
 
 .admin-shell {
   display: grid;
-  gap: 1.2rem;
-  grid-template-columns: minmax(260px, 360px) minmax(0, 760px);
+  gap: 1.4rem;
+  grid-template-columns: minmax(240px, 320px) minmax(0, 820px);
   margin: 0 auto;
-  max-width: 1220px;
-  padding: 38px 24px 72px;
+  max-width: 1240px;
+  padding: 32px 24px 72px;
 }
 
 .auth-shell {
@@ -1024,6 +1024,7 @@ figcaption {
 }
 
 .editor-panel,
+.editor-sidebar,
 .editor-canvas {
   background: var(--paper);
   border: 1px solid var(--line);
@@ -1068,6 +1069,137 @@ figcaption {
   resize: vertical;
 }
 
+.editor-sidebar {
+  align-self: start;
+  display: grid;
+  gap: 0.9rem;
+  max-height: calc(100vh - 120px);
+  padding: 1rem;
+  position: sticky;
+  top: 1rem;
+}
+
+.editor-sidebar__header,
+.editor-sidebar__actions,
+.compose-topline {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: space-between;
+}
+
+.editor-sidebar h1 {
+  font-size: 1.35rem;
+  margin: 0;
+}
+
+.post-list {
+  display: grid;
+  gap: 0.35rem;
+  overflow: auto;
+  padding-right: 0.2rem;
+}
+
+.post-list__item {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  color: var(--ink);
+  cursor: pointer;
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.72rem;
+  text-align: left;
+  width: 100%;
+}
+
+.post-list__item:hover,
+.post-list__item--active {
+  background: color-mix(in srgb, var(--canvas) 68%, var(--paper));
+  border-color: var(--line);
+}
+
+.post-list__title {
+  font-family: var(--font-display);
+  font-size: 0.92rem;
+  font-weight: 800;
+  line-height: 1.18;
+}
+
+.post-list__meta,
+.post-list__empty {
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.compose-shell {
+  display: grid;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.compose-topline {
+  padding-inline: 0.25rem;
+}
+
+.inline-date {
+  align-items: center;
+  color: var(--muted);
+  display: inline-flex;
+  font-size: 0.72rem;
+  font-weight: 800;
+  gap: 0.45rem;
+}
+
+.inline-date input {
+  background: transparent;
+  border: 0;
+  color: var(--ink);
+  font: inherit;
+  min-height: 2rem;
+  padding: 0;
+}
+
+.compose-canvas {
+  display: grid;
+  gap: 1rem;
+  min-height: 78vh;
+  padding: clamp(1.2rem, 4vw, 3rem);
+}
+
+.compose-title {
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: clamp(2.8rem, 6vw, 5.1rem);
+  font-weight: 800;
+  line-height: 0.98;
+  margin: 0;
+  outline: none;
+}
+
+.compose-title:empty::before,
+.editor-body:empty::before {
+  color: color-mix(in srgb, var(--muted) 72%, transparent);
+  content: attr(data-placeholder);
+}
+
+.cover-picker {
+  justify-self: start;
+}
+
+.cover-preview {
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-profile-corner);
+  display: block;
+  height: auto;
+  margin: 0.3rem 0 0.6rem;
+  max-height: none;
+  object-fit: cover;
+  width: 100%;
+}
+
 .editor-actions,
 .editor-toolbar {
   display: flex;
@@ -1080,6 +1212,8 @@ figcaption {
   background: color-mix(in srgb, var(--canvas) 62%, var(--paper));
   border: 1px solid var(--line);
   border-radius: var(--radius);
+  box-shadow: 0 12px 34px rgba(49, 45, 39, 0.1);
+  justify-self: start;
   padding: 0.55rem;
   position: sticky;
   top: 0.75rem;
@@ -1087,31 +1221,29 @@ figcaption {
 }
 
 .editor-canvas {
-  min-height: 72vh;
   outline: none;
-  padding: clamp(1rem, 4vw, 2.4rem);
 }
 
-.editor-canvas:empty::before {
-  color: var(--muted);
-  content: "Start writing...";
+.editor-body {
+  min-height: 44vh;
+  outline: none;
 }
 
-.editor-canvas h1,
-.editor-canvas h2,
-.editor-canvas h3 {
+.editor-body h1,
+.editor-body h2,
+.editor-body h3 {
   line-height: 1.1;
   margin: 1.2rem 0 0.5rem;
 }
 
-.editor-canvas p,
-.editor-canvas ul,
-.editor-canvas ol,
-.editor-canvas blockquote {
+.editor-body p,
+.editor-body ul,
+.editor-body ol,
+.editor-body blockquote {
   margin: 0 0 1rem;
 }
 
-.editor-canvas img {
+.editor-body img {
   border-radius: 6px;
   display: block;
   margin: 1rem 0;

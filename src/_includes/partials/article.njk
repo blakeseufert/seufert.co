@@ -41,7 +41,7 @@
   <article class="article-layout">
     <header class="article-hero">
       <div class="article-kicker">
-        {% for tag in postData.tags %}
+        {% for tag in postData.tags or [] %}
           {% if tag != "posts" %}
             <span class="pill">{{ tag }}</span>
           {% endif %}

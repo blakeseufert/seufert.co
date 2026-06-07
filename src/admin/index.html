@@ -50,45 +50,48 @@ permalink: /editor/
     </main>
 
     <main class="admin-shell" id="editorApp" hidden>
-      <section class="editor-panel" aria-label="Post settings">
-        <h1>Library</h1>
-        <label>Existing posts <select id="postSelect"></select></label>
-        <div class="editor-actions">
-          <button class="pill pill--button" id="refreshPostsButton" type="button">Refresh</button>
+      <aside class="editor-sidebar" aria-label="Post library">
+        <div class="editor-sidebar__header">
+          <h1>Posts</h1>
           <button class="pill pill--button" id="newPostButton" type="button">New</button>
-          <button class="pill pill--button pill--danger" id="deletePostButton" type="button">Delete</button>
         </div>
-
-        <h1>Post</h1>
-        <label>Title <input id="titleInput" autocomplete="off" value="Untitled note"></label>
-        <label>Slug <input id="slugInput" autocomplete="off" value="untitled-note"></label>
-        <label>Date <input id="dateInput" type="date"></label>
-        <label>Excerpt <textarea id="excerptInput"></textarea></label>
-        <label>Tags <input id="tagsInput" value="Systems, Notes"></label>
-        <label>Cover path <input id="coverInput" placeholder="/assets/uploads/example.png"></label>
-
-        <div class="editor-actions">
-          <button class="pill pill--button" id="savePostButton" type="button">Save post</button>
+        <div class="post-list" id="postList"></div>
+        <div class="editor-sidebar__actions">
+          <button class="pill pill--button" id="refreshPostsButton" type="button">Refresh</button>
+          <button class="pill pill--button pill--danger" id="deletePostButton" type="button">Delete</button>
           <button class="pill pill--button" id="signOutButton" type="button">Sign out</button>
         </div>
-      </section>
+      </aside>
 
-      <section aria-label="Editor">
-        <div class="editor-toolbar" aria-label="Formatting">
-          <button class="pill pill--button" data-command="h2" type="button">H2</button>
-          <button class="pill pill--button" data-command="h3" type="button">H3</button>
-          <button class="pill pill--button" data-command="bold" type="button">B</button>
-          <button class="pill pill--button" data-command="link" type="button">Link</button>
-          <button class="pill pill--button" data-command="ul" type="button">List</button>
-          <button class="pill pill--button" data-command="quote" type="button">Quote</button>
-          <button class="pill pill--button" data-command="pullquote" type="button">Pull quote</button>
-          <button class="pill pill--button" data-command="embed" type="button">Embed</button>
-          <label class="pill pill--button">Image <input id="imageInput" type="file" accept="image/*" hidden></label>
+      <section class="compose-shell" aria-label="Editor">
+        <div class="compose-topline">
+          <label class="inline-date">Date <input id="dateInput" type="date"></label>
+          <button class="pill pill--button" id="publishPostButton" type="button">Publish</button>
         </div>
-        <article class="editor-canvas post-body" id="editorCanvas" contenteditable="true">
-          <p>Start with a short opening paragraph. The public post layout will automatically apply the drop cap.</p>
-          <h2>A Clear Section</h2>
-          <p>Use markdown-style shortcuts while writing: type ##, ###, -, or > followed by space at the start of a line.</p>
+
+        <article class="editor-canvas compose-canvas">
+          <h1 class="compose-title" id="titleInput" contenteditable="true" data-placeholder="Title">Untitled note</h1>
+          <label class="cover-picker">
+            <span class="pill pill--button" id="coverButtonText">Add image</span>
+            <input id="coverImageInput" type="file" accept="image/*" hidden>
+          </label>
+          <img class="cover-preview" id="coverPreview" alt="" hidden>
+
+          <div class="editor-toolbar" aria-label="Formatting">
+            <button class="pill pill--button" data-command="h2" type="button">H2</button>
+            <button class="pill pill--button" data-command="h3" type="button">H3</button>
+            <button class="pill pill--button" data-command="bold" type="button">B</button>
+            <button class="pill pill--button" data-command="link" type="button">Link</button>
+            <button class="pill pill--button" data-command="ul" type="button">List</button>
+            <button class="pill pill--button" data-command="quote" type="button">Quote</button>
+            <button class="pill pill--button" data-command="pullquote" type="button">Pull quote</button>
+            <button class="pill pill--button" data-command="embed" type="button">Embed</button>
+            <label class="pill pill--button">Image <input id="imageInput" type="file" accept="image/*" hidden></label>
+          </div>
+
+          <div class="editor-body post-body" id="editorCanvas" contenteditable="true" data-placeholder="Start writing...">
+            <p>Start writing...</p>
+          </div>
         </article>
       </section>
     </main>
