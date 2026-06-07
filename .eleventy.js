@@ -1,3 +1,6 @@
+const fs = require("fs");
+const path = require("path");
+
 function normalizeBasePath(value) {
   const raw = String(value || "/").trim();
   if (!raw || raw === "/") return "/";
@@ -12,8 +15,53 @@ function withBasePath(url) {
   return `${basePath.slice(0, -1)}${url}`;
 }
 
+function yamlValue(value) {
+  return String(value || "")
+    .trim()
+    .replace(/^["']|["']$/g, "");
+}
+
+function parseFrontmatter(markdown) {
+  const match = markdown.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
+  if (!match) return { data: {}, body: markdown };
+
+  const data = {};
+  match[1].split("\n").forEach((line) => {
+    const pair = line.match(/^([A-Za-z0-9_-]+):\s*(.*)$/);
+    if (pair) data[pair[1]] = yamlValue(pair[2]);
+  });
+
+  return { data, body: match[2].trim() };
+}
+
+function localPostManifest() {
+  const postsDir = path.join(__dirname, "src", "posts");
+  if (!fs.existsSync(postsDir)) return [];
+
+  return fs.readdirSync(postsDir)
+    .filter((name) => name.endsWith(".md"))
+    .map((name) => {
+      const repoPath = `src/posts/${name}`;
+      const markdown = fs.readFileSync(path.join(postsDir, name), "utf8");
+      const parsed = parseFrontmatter(markdown);
+      return {
+        name,
+        path: repoPath,
+        markdown,
+        data: parsed.data,
+        body: parsed.body
+      };
+    })
+    .sort((a, b) => {
+      const dateDiff = (Date.parse(b.data.date) || 0) - (Date.parse(a.data.date) || 0);
+      return dateDiff || a.name.localeCompare(b.name);
+    });
+}
+
 module.exports = function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy({ "src/assets": "assets" });
+
+  eleventyConfig.addGlobalData("localPostManifest", localPostManifest);
 
   eleventyConfig.addCollection("posts", (collectionApi) => {
     return collectionApi
@@ -36,6 +84,8 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.addFilter("firstPost", (posts) => posts && posts[0]);
 
   eleventyConfig.addFilter("withBasePath", withBasePath);
+
+  eleventyConfig.addFilter("json", (value) => JSON.stringify(value, null, 2));
 
   eleventyConfig.addTransform("prefixRootRelativeUrls", function (content) {
     if (!this.page.outputPath || !this.page.outputPath.endsWith(".html")) return content;

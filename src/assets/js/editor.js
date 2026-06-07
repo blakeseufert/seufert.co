@@ -1144,7 +1144,7 @@ function renderPostList() {
     meta.className = "post-list__meta";
     meta.textContent = currentPost && currentPost.path === post.path && isDirty
       ? `${post.data.date || "No date"} - unpublished edits`
-      : post.data.date || "No date";
+      : `${post.data.date || "No date"}${post.localOnly ? " - local only" : ""}`;
 
     button.append(title, meta);
     const actions = document.createElement("details");
@@ -1172,6 +1172,11 @@ function renderPostList() {
     remove.dataset.path = post.path;
     remove.textContent = "Delete";
 
+    if (post.localOnly) {
+      remove.disabled = true;
+      remove.textContent = "Delete on GitHub only";
+    }
+
     menu.append(duplicate, remove);
     actions.append(summary, menu);
     item.append(button, actions);
@@ -1179,15 +1184,27 @@ function renderPostList() {
   });
 }
 
+async function loadLocalPostManifest() {
+  try {
+    const response = await fetch(publicUrl("/editor/posts.json"), { cache: "no-store" });
+    if (!response.ok) return [];
+    const localPosts = await response.json();
+    return Array.isArray(localPosts) ? localPosts : [];
+  } catch (_error) {
+    return [];
+  }
+}
+
 async function loadPostList() {
   setStatus("Loading posts...");
   const config = getConfig();
+  const localPosts = await loadLocalPostManifest();
   const response = await githubRequest(`contents/${apiPath(config.postsDir)}?ref=${encodeURIComponent(config.branch)}`);
 
   if (response.status === 404) {
-    posts = [];
+    posts = localPosts.map((post) => ({ ...post, localOnly: true }));
     renderPostList();
-    setStatus(`No directory found at ${config.postsDir}. Saving will create files there.`);
+    setStatus(`Loaded ${posts.length} local post${posts.length === 1 ? "" : "s"}. Saving will create files in GitHub.`);
     return;
   }
 
@@ -1207,16 +1224,23 @@ async function loadPostList() {
       sha: data.sha,
       markdown,
       data: parsed.data,
-      body: parsed.body
+      body: parsed.body,
+      localOnly: false
     };
   }));
 
-  posts = loaded.sort((a, b) => {
+  const githubPaths = new Set(loaded.map((post) => post.path));
+  const localOnlyPosts = localPosts
+    .filter((post) => !githubPaths.has(post.path))
+    .map((post) => ({ ...post, localOnly: true }));
+
+  posts = [...loaded, ...localOnlyPosts].sort((a, b) => {
     const dateDiff = (Date.parse(b.data.date) || 0) - (Date.parse(a.data.date) || 0);
     return dateDiff || a.name.localeCompare(b.name);
   });
   renderPostList();
-  setStatus(`Loaded ${posts.length} post${posts.length === 1 ? "" : "s"}.`);
+  const localOnlyCount = localOnlyPosts.length;
+  setStatus(`Loaded ${posts.length} post${posts.length === 1 ? "" : "s"}${localOnlyCount ? ` (${localOnlyCount} local only)` : ""}.`);
 }
 
 async function loadSelectedPost(path) {
@@ -1224,6 +1248,18 @@ async function loadSelectedPost(path) {
 
   let post = posts.find((item) => item.path === path);
   if (!post) return;
+
+  if (post.localOnly) {
+    currentPost = post;
+    pendingImages.splice(0);
+    setTitle(post.data.title || post.name.replace(/\.md$/, ""));
+    els.date.value = post.data.date || today();
+    setCoverPreview(post.data.cover ? publicUrl(post.data.cover) : "", post.data.cover || "");
+    els.editor.innerHTML = markdownToEditorHtml(post.body);
+    setCleanState();
+    setStatus("Loaded local-only post. Publishing will create it in GitHub.");
+    return;
+  }
 
   const config = getConfig();
   const response = await githubRequest(`contents/${apiPath(path)}?ref=${encodeURIComponent(config.branch)}`);
@@ -1251,6 +1287,8 @@ async function loadSelectedPost(path) {
 async function fetchPost(path) {
   const post = posts.find((item) => item.path === path);
   if (!post) throw new Error("Post not found.");
+
+  if (post.localOnly) return post;
 
   const response = await githubRequest(`contents/${apiPath(path)}?ref=${encodeURIComponent(getConfig().branch)}`);
   const data = await response.json();
@@ -1284,7 +1322,7 @@ async function duplicatePost(path) {
 
 async function savePost() {
   const slug = currentSlug();
-  const wasUpdate = Boolean(currentPost);
+  const wasUpdate = Boolean(currentPost && !currentPost.localOnly);
 
   setStatus("Uploading images...");
   for (const image of pendingImages.splice(0)) {
@@ -1296,7 +1334,7 @@ async function savePost() {
   const newPath = postPathFromSlug(slug);
   await putFile(newPath, base64FromText(markdown), `${wasUpdate ? "Update" : "Publish"} ${getTitle()}`);
 
-  if (currentPost && currentPost.path !== newPath) {
+  if (currentPost && !currentPost.localOnly && currentPost.path !== newPath) {
     await deleteFile(currentPost.path, currentPost.sha, `Remove renamed post ${currentPost.name}`);
   }
 
