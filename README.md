@@ -74,20 +74,11 @@ The editor is available at `/editor/`. It is fully client-side and reads/writes 
 
 When a valid GitHub token is not active in the browser session, the editor shows only a GitHub sign-in gate. After sign-in it lists every markdown file in the configured posts directory, loads existing posts for editing, overwrites the same file on save, supports renaming by changing the slug, and can delete posts.
 
-Create a GitHub OAuth app and enable device flow. The editor carries the static repository settings and public OAuth client ID in page metadata. Uploaded images are saved to `src/assets/uploads/`; posts are saved to `src/posts/` by default.
+Because the site is fully static and uses no external auth bridge, the editor connects with a fine-grained GitHub personal access token. Create a token limited to the `blakeseufert/seufert.co` repository with repository `Contents` read/write permission. GitHub grants metadata read access automatically.
 
-GitHub's token endpoints are not browser-callable from a static page, so the editor uses a tiny OAuth bridge for only the device-code and access-token exchange. Deploy `auth/github-device-oauth-worker.js` as a Cloudflare Worker and set:
+Paste the token once at `/editor/`. The editor validates it with GitHub, stores it in this browser until sign-out, and uses it directly for create, update, and delete actions. You can also open `/editor/#token=github_pat_...` once; the editor saves the token locally and immediately removes it from the visible URL.
 
-- `GITHUB_CLIENT_ID`: the GitHub App client ID.
-- `ALLOWED_ORIGIN`: the site origin, for example `https://blakeseufert.github.io`.
-
-Then set the deployed Worker URL in:
-
-```html
-<meta name="github-oauth-proxy-url" content="https://your-worker.example.workers.dev">
-```
-
-After OAuth completes, the static editor stores the returned token in the browser session and uses it directly for GitHub API create, update, and delete actions.
+Do not hardcode a token in the repository. The OAuth client ID is public and harmless, but it cannot create a usable GitHub API token from a static page by itself. Uploaded images are saved to `src/assets/uploads/`; posts are saved to `src/posts/` by default.
 
 ## Design Standards
 

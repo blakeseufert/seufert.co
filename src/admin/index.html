@@ -9,12 +9,10 @@ permalink: /editor/
     <title>Editor | seufert.co</title>
     <meta name="theme-color" content="#efede9">
     <meta name="site-base-path" content="{{ '/' | withBasePath }}">
-    <meta name="github-oauth-client-id" content="Iv23livAzGcG0IWwxX6LE">
     <meta name="github-owner" content="blakeseufert">
     <meta name="github-repo" content="seufert.co">
     <meta name="github-branch" content="main">
     <meta name="github-posts-dir" content="src/posts">
-    <meta name="github-oauth-proxy-url" content="">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sura:wght@400;700&display=swap" rel="stylesheet">
@@ -32,8 +30,9 @@ permalink: /editor/
     <main class="auth-shell" id="authGate">
       <section class="editor-panel auth-card" aria-label="GitHub sign in">
         <h1>Sign in</h1>
-        <p>Connect GitHub to create, edit, and delete posts in the site repository.</p>
-        <button class="pill pill--button" id="authButton" type="button">Sign in with GitHub</button>
+        <p>Connect a GitHub token to create, edit, and delete posts in the site repository.</p>
+        <label>GitHub token <input id="tokenInput" type="password" autocomplete="off" placeholder="github_pat_..."></label>
+        <button class="pill pill--button" id="authButton" type="button">Connect token</button>
         <p class="status-line" id="statusLine"></p>
       </section>
     </main>

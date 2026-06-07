@@ -1,13 +1,9 @@
-const storageKey = "seufert-editor-config";
 const tokenKey = "seufert-editor-token";
-const clientStorageKey = "seufert-editor-client-id";
 const editorConfig = {
   owner: document.querySelector('meta[name="github-owner"]')?.content.trim() || "blakeseufert",
   repo: document.querySelector('meta[name="github-repo"]')?.content.trim() || "seufert.co",
   branch: document.querySelector('meta[name="github-branch"]')?.content.trim() || "main",
-  postsDir: normalizeDir(document.querySelector('meta[name="github-posts-dir"]')?.content || "src/posts"),
-  clientId: document.querySelector('meta[name="github-oauth-client-id"]')?.content.trim() || "",
-  oauthProxyUrl: document.querySelector('meta[name="github-oauth-proxy-url"]')?.content.trim().replace(/\/$/, "") || ""
+  postsDir: normalizeDir(document.querySelector('meta[name="github-posts-dir"]')?.content || "src/posts")
 };
 const siteBasePath = document.querySelector('meta[name="site-base-path"]')?.content.trim() || "/";
 const pendingImages = [];
@@ -16,6 +12,7 @@ const els = {
   authGate: document.querySelector("#authGate"),
   editorApp: document.querySelector("#editorApp"),
   authButton: document.querySelector("#authButton"),
+  token: document.querySelector("#tokenInput"),
   signOutButton: document.querySelector("#signOutButton"),
   savePostButton: document.querySelector("#savePostButton"),
   refreshPostsButton: document.querySelector("#refreshPostsButton"),
@@ -83,27 +80,19 @@ function publicUrl(path) {
 
 function getConfig() {
   return {
-    ...editorConfig,
-    clientId: localStorage.getItem(clientStorageKey) || editorConfig.clientId
+    ...editorConfig
   };
-}
-
-function saveConfig() {
-  localStorage.setItem(storageKey, JSON.stringify(getConfig()));
 }
 
 function loadConfig() {
   els.date.value = new Date().toISOString().slice(0, 10);
 
   try {
-    const params = new URLSearchParams(window.location.search);
-    const clientId = params.get("client_id") || params.get("github_client_id");
-    if (clientId) {
-      localStorage.setItem(clientStorageKey, clientId.trim());
-      params.delete("client_id");
-      params.delete("github_client_id");
-      const cleanUrl = `${window.location.pathname}${params.toString() ? `?${params}` : ""}${window.location.hash}`;
-      window.history.replaceState({}, "", cleanUrl);
+    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+    const token = hashParams.get("token") || hashParams.get("github_token");
+    if (token) {
+      localStorage.setItem(tokenKey, token.trim());
+      window.history.replaceState({}, "", `${window.location.pathname}${window.location.search}`);
     }
   } catch {
     setStatus("Editor settings could not be loaded.");
@@ -233,12 +222,8 @@ function showAuthGate() {
   els.authGate.hidden = false;
   els.editorApp.hidden = true;
   els.editorUser.hidden = true;
-  els.authButton.textContent = "Sign in with GitHub";
-  if (!getConfig().clientId) {
-    setStatus("GitHub sign-in needs the OAuth client ID in the editor page metadata.");
-  } else if (!getConfig().oauthProxyUrl) {
-    setStatus("GitHub sign-in needs the OAuth bridge URL in the editor page metadata.");
-  }
+  els.authButton.textContent = "Connect token";
+  setStatus("Paste a repo-scoped GitHub token once. It stays in this browser until you sign out.");
 }
 
 function showEditor() {
@@ -249,83 +234,17 @@ function showEditor() {
   setStatus("");
 }
 
-async function startDeviceAuth() {
-  const { clientId, oauthProxyUrl } = getConfig();
-  if (!clientId) {
-    setStatus("GitHub sign-in is not configured yet. Add the OAuth client ID to the editor page metadata.");
-    return;
-  }
-  if (!oauthProxyUrl) {
-    setStatus("GitHub sign-in needs an OAuth bridge. A static page cannot call GitHub token endpoints directly.");
+async function connectToken() {
+  const token = els.token.value.trim();
+  if (!token) {
+    setStatus("Paste a GitHub token first.");
     return;
   }
 
-  saveConfig();
-  let authWindow = window.open("", "github-oauth", "popup,width=640,height=760");
-  setStatus("Opening GitHub sign-in...");
-
-  const deviceResponse = await fetch(`${oauthProxyUrl}/device/code`, {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      client_id: clientId,
-      scope: "repo"
-    })
-  });
-
-  if (!deviceResponse.ok) {
-    if (authWindow) authWindow.close();
-    throw new Error("GitHub did not return a device code.");
-  }
-
-  const device = await deviceResponse.json();
-  const authUrl = device.verification_uri_complete || device.verification_uri;
-  if (authWindow) {
-    authWindow.location.href = authUrl;
-    authWindow.focus();
-  } else {
-    window.open(authUrl, "_blank", "noopener,noreferrer");
-  }
-  setStatus(device.verification_uri_complete ? "Complete GitHub sign-in in the window that opened." : `Enter ${device.user_code} in the GitHub tab.`);
-
-  const startedAt = Date.now();
-  let intervalMs = (device.interval || 5) * 1000;
-
-  while (Date.now() - startedAt < device.expires_in * 1000) {
-    await new Promise((resolve) => setTimeout(resolve, intervalMs));
-
-    const tokenResponse = await fetch(`${oauthProxyUrl}/access_token`, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        client_id: clientId,
-        device_code: device.device_code,
-        grant_type: "urn:ietf:params:oauth:grant-type:device_code"
-      })
-    });
-
-    const tokenData = await tokenResponse.json();
-    if (tokenData.access_token) {
-      localStorage.setItem(tokenKey, tokenData.access_token);
-      await validateSession();
-      setStatus("GitHub connected.");
-      return;
-    }
-
-    if (tokenData.error === "slow_down") {
-      intervalMs += 5000;
-    } else if (tokenData.error && tokenData.error !== "authorization_pending") {
-      throw new Error(tokenData.error_description || tokenData.error);
-    }
-  }
-
-  throw new Error("GitHub code expired.");
+  localStorage.setItem(tokenKey, token);
+  els.token.value = "";
+  setStatus("Checking token...");
+  await validateSession();
 }
 
 function signOut() {
@@ -852,7 +771,7 @@ els.refreshPostsButton.addEventListener("click", () => loadPostList().catch((err
 els.newPostButton.addEventListener("click", resetEditor);
 els.deletePostButton.addEventListener("click", () => deleteCurrentPost().catch((error) => setStatus(error.message)));
 els.signOutButton.addEventListener("click", signOut);
-els.authButton.addEventListener("click", () => startDeviceAuth().catch((error) => setStatus(error.message)));
+els.authButton.addEventListener("click", () => connectToken().catch((error) => setStatus(error.message)));
 
 loadConfig();
 validateSession();
