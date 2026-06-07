@@ -537,7 +537,7 @@ figcaption {
 .more-posts {
   display: grid;
   gap: 1rem;
-  margin: clamp(5rem, 10vw, 9rem) 0 0;
+  margin: clamp(7rem, 14vw, 13rem) 0 0;
   max-width: 640px;
 }
 
@@ -929,7 +929,7 @@ figcaption {
 
   .more-posts {
     gap: 1.3rem;
-    margin-top: 9rem;
+    margin-top: 15rem;
     max-width: 770px;
   }
 
