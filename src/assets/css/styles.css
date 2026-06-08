@@ -786,11 +786,12 @@ figcaption {
   align-items: center;
   display: grid;
   gap: 0.9rem;
-  grid-template-columns: 64px 1fr auto;
+  grid-template-columns: 64px minmax(0, 1fr) max-content;
   min-height: 52px;
   padding: 0.35rem 0;
   position: relative;
   text-decoration: none;
+  width: 100%;
 }
 
 .more-post--current {
@@ -1218,7 +1219,7 @@ figcaption {
   }
 
   .more-post {
-    grid-template-columns: 64px 1fr 52px;
+    grid-template-columns: 64px minmax(0, 1fr) max-content;
   }
 
   .more-post img {
