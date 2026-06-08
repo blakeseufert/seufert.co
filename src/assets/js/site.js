@@ -63,7 +63,7 @@ function setupProfileBioToggle() {
     toggle.setAttribute("aria-expanded", String(nextOpen));
     more.hidden = !nextOpen;
     panel.classList.toggle("profile-panel--bio-open", nextOpen);
-    label.textContent = nextOpen ? "Collapse" : "More About Blake";
+    label.textContent = nextOpen ? "Collapse" : "More";
   });
 }
 

@@ -188,7 +188,6 @@ label.pill:focus-within {
   background: color-mix(in srgb, var(--coral-soft) 58%, var(--paper));
   border-color: color-mix(in srgb, var(--coral) 42%, transparent);
   box-shadow: 0 8px 18px rgba(222, 117, 130, 0.12);
-  color: color-mix(in srgb, var(--ink) 78%, var(--coral));
 }
 
 a.pill:active,
@@ -379,12 +378,16 @@ button.pill {
 .profile-panel__bio {
   color: var(--muted);
   font-size: 0.75rem;
-  margin: 0 auto 0.9rem;
+  margin: 0 auto 0.35rem;
   max-width: 12.5rem;
 }
 
 .profile-panel__bio-more[hidden] {
   display: none;
+}
+
+.profile-panel__bio-more {
+  margin-top: 1rem;
 }
 
 .profile-panel__more {
@@ -399,8 +402,13 @@ button.pill {
 .profile-panel__chevron {
   display: block;
   height: 0.75rem;
+  margin-top: 0.16rem;
   transition: transform 160ms ease;
   width: 0.75rem;
+}
+
+.profile-panel--bio-open .profile-panel__chevron {
+  transform: rotate(180deg);
 }
 
 .profile-panel__made {
@@ -786,20 +794,22 @@ figcaption {
 }
 
 .more-post--current {
-  background: color-mix(in srgb, var(--coral) 4%, transparent);
+  background: color-mix(in srgb, var(--coral) 12%, transparent);
   border-radius: var(--radius);
-  padding-left: 0.85rem;
+  opacity: 0.5;
+  padding-left: 0.92rem;
   padding-right: 0.5rem;
 }
 
 .more-post--current::before {
   background: linear-gradient(180deg, var(--coral) 0%, #df8064 100%);
   border-radius: 999px;
-  bottom: 0.55rem;
   content: "";
-  left: 0.35rem;
+  height: 48px;
+  left: 0.42rem;
   position: absolute;
-  top: 0.55rem;
+  top: 50%;
+  transform: translateY(-50%);
   width: 4px;
 }
 
@@ -1077,7 +1087,7 @@ figcaption {
     font-family: var(--font-display);
     font-size: 0.875rem;
     line-height: 1.12;
-    margin: 0 0 12px auto;
+    margin: 0 0 5px auto;
     max-height: 78px;
     max-width: 254px;
     overflow: hidden;
@@ -1213,6 +1223,10 @@ figcaption {
 
   .more-post img {
     aspect-ratio: 64 / 40;
+  }
+
+  .more-post--current::before {
+    height: 40px;
   }
 
   .more-post__title {

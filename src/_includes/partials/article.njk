@@ -55,7 +55,7 @@
       </div>
     </div>
     <button class="profile-panel__more" type="button" aria-expanded="false" aria-controls="profile-bio-more" data-profile-bio-toggle>
-      <span data-profile-bio-label>More About Blake</span>
+      <span data-profile-bio-label>More</span>
       <img class="profile-panel__chevron" src="/assets/uploads/icons/chevron-down.svg?v={{ site.assetVersion }}" alt="" aria-hidden="true">
     </button>
     <p class="profile-panel__made">Made with <a class="profile-panel__heart-link" href="/editor/" aria-label="Open editor"><svg class="profile-panel__heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.2 5.45 13.98C2.2 10.9 3.86 5.5 8.24 5.5c1.58 0 2.87.74 3.76 1.9.89-1.16 2.18-1.9 3.76-1.9 4.38 0 6.04 5.4 2.79 8.48L12 20.2Z"/></svg></a> in Melbourne</p>
@@ -102,7 +102,11 @@
     <footer class="more-posts" aria-label="Posts">
       {% for item in collections.posts %}
         {% set isCurrentPost = item.url == postUrl %}
-        <a class="more-post{% if isCurrentPost %} more-post--current{% endif %}" href="{{ item.url }}"{% if isCurrentPost %} aria-current="page"{% endif %}>
+        {% if isCurrentPost %}
+          <div class="more-post more-post--current" aria-current="page">
+        {% else %}
+          <a class="more-post" href="{{ item.url }}">
+        {% endif %}
           {% if item.data.cover %}
             <img src="{{ item.data.cover }}" alt="" loading="lazy">
           {% endif %}
@@ -110,7 +114,11 @@
           <span class="more-post__meta">
             <time datetime="{{ item.date | isoDate }}">{{ item.date | readableDate }}</time>
           </span>
-        </a>
+        {% if isCurrentPost %}
+          </div>
+        {% else %}
+          </a>
+        {% endif %}
       {% endfor %}
     </footer>
     <div class="site-watermark" aria-hidden="true">{{ site.name }}</div>
