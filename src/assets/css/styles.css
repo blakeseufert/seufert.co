@@ -51,10 +51,16 @@ a {
   color: inherit;
   text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
   text-underline-offset: 0.16em;
+  transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, color 160ms ease, opacity 160ms ease, text-decoration-color 160ms ease, transform 120ms ease;
 }
 
-a:hover {
-  text-decoration-color: currentColor;
+a:hover,
+a:focus-visible {
+  text-decoration-color: var(--coral);
+}
+
+a:active {
+  opacity: 0.72;
 }
 
 button,
@@ -145,6 +151,11 @@ textarea {
   transform: translate(-50%, 0);
 }
 
+.icon-link:hover,
+.icon-link:focus-visible {
+  color: var(--coral);
+}
+
 .topbar > .pill {
   justify-self: end;
 }
@@ -166,6 +177,25 @@ textarea {
   text-decoration: none;
   vertical-align: middle;
   white-space: nowrap;
+}
+
+a.pill:hover,
+a.pill:focus-visible,
+button.pill:hover,
+button.pill:focus-visible,
+label.pill:hover,
+label.pill:focus-within {
+  background: color-mix(in srgb, var(--coral-soft) 58%, var(--paper));
+  border-color: color-mix(in srgb, var(--coral) 42%, transparent);
+  box-shadow: 0 8px 18px rgba(222, 117, 130, 0.12);
+  color: color-mix(in srgb, var(--ink) 78%, var(--coral));
+}
+
+a.pill:active,
+button.pill:active,
+label.pill:active {
+  box-shadow: none;
+  transform: translateY(1px);
 }
 
 .pill__icon {
@@ -366,6 +396,13 @@ button.pill {
   padding: 0;
 }
 
+.profile-panel__chevron {
+  display: block;
+  height: 0.75rem;
+  transition: transform 160ms ease;
+  width: 0.75rem;
+}
+
 .profile-panel__made {
   color: var(--muted);
   font-family: var(--font-display);
@@ -378,6 +415,21 @@ button.pill {
 .profile-panel__made a {
   color: #de7582;
   text-decoration: none;
+}
+
+.profile-panel__heart-link {
+  align-items: center;
+  display: inline-flex;
+  justify-content: center;
+  margin: 0 0.08rem;
+  vertical-align: -0.08em;
+}
+
+.profile-panel__heart {
+  display: block;
+  fill: currentColor;
+  height: 0.74rem;
+  width: 0.74rem;
 }
 
 .article-layout {
@@ -611,11 +663,22 @@ button.pill {
 }
 
 .post-body blockquote:not(.quote) {
-  border-left: 4px solid var(--coral);
   color: var(--ink);
   font-family: var(--font-serif);
   font-size: clamp(1.2rem, 2.3vw, 1.55rem);
+  position: relative;
   padding-left: 1.15rem;
+}
+
+.post-body blockquote:not(.quote)::before {
+  background: linear-gradient(180deg, var(--coral) 0%, #df8064 100%);
+  border-radius: 999px;
+  bottom: 0.2rem;
+  content: "";
+  left: 0;
+  position: absolute;
+  top: 0.2rem;
+  width: 4px;
 }
 
 .quote {
@@ -718,14 +781,26 @@ figcaption {
   grid-template-columns: 64px 1fr auto;
   min-height: 52px;
   padding: 0.35rem 0;
+  position: relative;
   text-decoration: none;
 }
 
 .more-post--current {
-  background: rgba(217, 217, 217, 0.2);
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: color-mix(in srgb, var(--coral) 4%, transparent);
   border-radius: var(--radius);
-  padding-inline: 0.5rem;
+  padding-left: 0.85rem;
+  padding-right: 0.5rem;
+}
+
+.more-post--current::before {
+  background: linear-gradient(180deg, var(--coral) 0%, #df8064 100%);
+  border-radius: 999px;
+  bottom: 0.55rem;
+  content: "";
+  left: 0.35rem;
+  position: absolute;
+  top: 0.55rem;
+  width: 4px;
 }
 
 .more-post img {
@@ -744,6 +819,15 @@ figcaption {
   text-underline-offset: 0.12em;
 }
 
+.more-post:hover .more-post__title,
+.more-post:focus-visible .more-post__title {
+  text-decoration-color: var(--coral);
+}
+
+.more-post--current .more-post__title {
+  font-weight: 800;
+}
+
 .more-post__meta {
   align-items: end;
   display: grid;
@@ -755,10 +839,7 @@ figcaption {
   color: var(--muted);
   font-size: 0.65rem;
   font-weight: 800;
-}
-
-.more-post__current {
-  color: var(--ink);
+  white-space: nowrap;
 }
 
 .site-watermark {
@@ -1024,11 +1105,7 @@ figcaption {
     text-decoration: none;
   }
 
-  .profile-panel__more span[aria-hidden="true"] {
-    transition: transform 160ms ease;
-  }
-
-  .profile-panel--bio-open .profile-panel__more span[aria-hidden="true"] {
+  .profile-panel--bio-open .profile-panel__chevron {
     transform: rotate(180deg);
   }
 
