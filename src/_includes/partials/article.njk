@@ -70,13 +70,6 @@
 
   <article class="article-layout">
     <header class="article-hero">
-      <div class="article-kicker">
-        {% for tag in postData.tags or [] %}
-          {% if tag != "posts" %}
-            <span class="pill">{{ tag }}</span>
-          {% endif %}
-        {% endfor %}
-      </div>
       <h1>{{ postData.title }}</h1>
       {% if postData.cover %}
         <img class="article-cover" src="{{ postData.cover }}" alt="{{ postData.coverAlt or postData.title }}">

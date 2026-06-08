@@ -508,10 +508,6 @@ button.pill {
   margin-bottom: clamp(1.4rem, 3vw, 2.4rem);
 }
 
-.article-kicker {
-  display: none;
-}
-
 .article-hero h1 {
   font-family: var(--font-display);
   font-size: clamp(2.7rem, 7vw, 4.9rem);

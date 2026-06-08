@@ -47,7 +47,7 @@ Supported markdown patterns:
 - Gallery shortcode:
 
 ```njk
-{% gallery "/assets/uploads/a.png|Alt text|Caption", "/assets/uploads/b.png|Alt text|Caption" %}
+{% gallery "/assets/uploads/a.png|Alt text", "/assets/uploads/b.png|Alt text" %}
 ```
 
 - Video shortcode:

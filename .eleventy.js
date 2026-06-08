@@ -60,6 +60,7 @@ function localPostManifest() {
 
 module.exports = function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy({ "src/assets": "assets" });
+  eleventyConfig.addPassthroughCopy({ "src/favicon.png": "favicon.png" });
 
   eleventyConfig.addGlobalData("localPostManifest", localPostManifest);
 
