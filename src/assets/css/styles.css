@@ -1240,7 +1240,7 @@ figcaption {
     font-size: 0.625rem;
     font-weight: 700;
     line-height: 1;
-    margin: 150px 0 0;
+    margin: 128px 0 0;
   }
 
   .profile-panel__made a {
@@ -2350,7 +2350,7 @@ figcaption {
     font-size: 0.625rem;
     font-weight: 700;
     line-height: 1;
-    margin: 0.9rem 0 2.5rem;
+    margin: 0.35rem 0 2.5rem;
   }
 
   .admin-shell {
