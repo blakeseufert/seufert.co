@@ -1346,7 +1346,7 @@ figcaption {
     aspect-ratio: 64 / 40;
   }
 
-  .more-post--current::before {
+  .more-post::before {
     height: 40px;
   }
 
