@@ -153,7 +153,7 @@ textarea {
 
 .icon-link:hover,
 .icon-link:focus-visible {
-  color: var(--coral);
+  color: currentColor;
 }
 
 .topbar > .pill {
@@ -185,8 +185,6 @@ button.pill:hover,
 button.pill:focus-visible,
 label.pill:hover,
 label.pill:focus-within {
-  background: color-mix(in srgb, var(--coral-soft) 58%, var(--paper));
-  border-color: color-mix(in srgb, var(--coral) 42%, transparent);
   box-shadow: 0 8px 18px rgba(222, 117, 130, 0.12);
 }
 
@@ -233,7 +231,7 @@ label.pill:active {
 
 .pill--accent:hover,
 .pill--accent:focus-visible {
-  filter: saturate(1.08) brightness(1.02);
+  filter: none;
 }
 
 .pill--danger {
