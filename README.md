@@ -1,15 +1,37 @@
 # seufert.co
 
-Static personal blog built with Eleventy and designed for GitHub Pages.
+This is the source for [seufert.co](https://seufert.co), a static personal blog built with Eleventy and published with GitHub Pages.
 
-## Run locally
+Blog posts are kept as Markdown files in [`src/posts/`](src/posts/), so they can be read directly in the repository as well as through the website.
+
+## About
+
+The site uses one article layout for every post. The most recent dated Markdown post becomes the homepage, and each post also gets its own URL.
+
+Supported post content includes:
+
+- `h1`, `h2`, and `h3` headings
+- Drop caps on the first paragraph
+- Lists, links, images, and galleries
+- YouTube/video embeds
+- Pull quote and quiet quote styles
+
+Images and other site assets live in [`src/assets/`](src/assets/).
+
+## Editing
+
+The browser editor lives at `/editor/`. It is fully static and uses a GitHub personal access token in the browser session to create, update, duplicate, and delete Markdown posts through the GitHub Contents API.
+
+Tokens should not be committed to the repo. The editor sign-in page includes the setup notes for creating a fine-grained token with repository Contents read/write access.
+
+## Local Development
 
 ```sh
 npm install
 npm run start
 ```
 
-Build the production site with:
+Build the static site:
 
 ```sh
 npm run build
@@ -17,80 +39,22 @@ npm run build
 
 The generated site is written to `_site/`.
 
-## Content
-
-Posts live in `src/posts/` as markdown files. The latest dated post is rendered as the homepage, and each post uses the same article layout.
-
-Post front matter:
-
-```yaml
----
-layout: layouts/post.njk
-title: "Post title"
-date: 2026-06-06
-excerpt: "Short summary."
-cover: "/assets/uploads/image.png"
-coverAlt: "Image description"
-tags:
-  - posts
-  - Systems
----
-```
-
-Supported markdown patterns:
-
-- `#`, `##`, and `###` headings
-- Automatic drop cap on the first paragraph
-- Ordered and unordered lists
-- Links and images
-- Standard markdown blockquotes
-- Gallery shortcode:
-
-```njk
-{% gallery "/assets/uploads/a.png|Alt text", "/assets/uploads/b.png|Alt text" %}
-```
-
-- Video shortcode:
-
-```njk
-{% youtube "VIDEO_ID", "Caption" %}
-```
-
-- Quote styles:
-
-```njk
-{% pullquote "Optional cite" %}
-Large pull quote.
-{% endpullquote %}
-
-{% quietquote "Optional cite" %}
-Quieter boxed quote.
-{% endquietquote %}
-```
-
-## Editor
-
-The editor is available at `/editor/`. It is fully client-side and reads/writes markdown through the GitHub Contents API.
-
-When a valid GitHub token is not active in the browser session, the editor shows only a GitHub sign-in gate. After sign-in it lists every markdown file in the configured posts directory, loads existing posts for editing, overwrites the same file on save, supports renaming by changing the slug, and can delete posts.
-
-Because the site is fully static and uses no external auth bridge, the editor connects with a fine-grained GitHub personal access token. Create a token limited to the `blakeseufert/seufert.co` repository with repository `Contents` read/write permission. GitHub grants metadata read access automatically.
-
-Paste the token once at `/editor/`. The editor validates it with GitHub, stores it in this browser until sign-out, and uses it directly for create, update, and delete actions. You can also open `/editor/#token=github_pat_...` once; the editor saves the token locally and immediately removes it from the visible URL.
-
-Do not hardcode a token in the repository. The OAuth client ID is public and harmless, but it cannot create a usable GitHub API token from a static page by itself. Uploaded images are saved to `src/assets/uploads/`; posts are saved to `src/posts/` by default.
-
-## Design Standards
-
-Core styles live in `src/assets/css/styles.css`. Reuse the shared `.pill` classes for tags, compact links, editor controls, and small action buttons:
-
-- `.pill`
-- `.pill--soft`
-- `.pill--small`
-- `.pill--button`
-
-Avoid recreating pill-like styles in new components.
-
 ## Deploy
 
-`.github/workflows/pages.yml` builds the site and deploys `_site/` to GitHub Pages on pushes to `main`.
+Pushes to `main` run [`.github/workflows/pages.yml`](.github/workflows/pages.yml), build the Eleventy site, and deploy `_site/` to GitHub Pages.
+
+The workflow currently sets `BASE_PATH: /seufert.co/` so assets and links work on the project Pages URL:
+
+`https://blakeseufert.github.io/seufert.co/`
+
+When the custom domain `seufert.co` is active in GitHub Pages, change that workflow value to:
+
+```yaml
+BASE_PATH: /
+```
+
+or remove the `BASE_PATH` line entirely. The rest of the site is already set up for static hosting.
+
+## Design
+
+Shared visual styles live in [`src/assets/css/styles.css`](src/assets/css/styles.css). Reuse the `.pill` classes for small linked labels, controls, and compact buttons rather than recreating pill styles in new components.
