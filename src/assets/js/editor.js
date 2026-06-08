@@ -8,6 +8,7 @@ const editorConfig = {
 const siteBasePath = document.querySelector('meta[name="site-base-path"]')?.content.trim() || "/";
 const defaultCoverPath = "/assets/uploads/article-office.webp";
 const pendingImages = [];
+const deletedPostPaths = new Set();
 
 const els = {
   authGate: document.querySelector("#authGate"),
@@ -43,6 +44,7 @@ let signedInUser = null;
 let uploadTarget = "inline";
 let activeGallery = null;
 let activeImageForGallery = null;
+let quoteExitArmedBlock = null;
 let lastCleanSnapshot = "";
 let isDirty = false;
 
@@ -371,8 +373,65 @@ function applyQuoteBlock(className = "") {
   replaceBlock(block, quote);
 }
 
+function stripTrailingEmptyQuoteLine(block) {
+  while (block.lastChild) {
+    const last = block.lastChild;
+
+    if (last.nodeType === Node.TEXT_NODE && !last.textContent.trim()) {
+      last.remove();
+      continue;
+    }
+
+    if (last.nodeType === Node.ELEMENT_NODE) {
+      const tag = last.tagName;
+      const isEmptyLine = ["BR", "DIV", "P"].includes(tag) && !last.textContent.trim();
+      if (isEmptyLine) {
+        last.remove();
+        continue;
+      }
+    }
+
+    break;
+  }
+
+  if (!block.textContent.trim()) block.innerHTML = "<br>";
+}
+
+function insertParagraphAfterBlock(block) {
+  stripTrailingEmptyQuoteLine(block);
+
+  const paragraph = document.createElement("p");
+  paragraph.innerHTML = "<br>";
+  block.after(paragraph);
+
+  const range = document.createRange();
+  range.selectNodeContents(paragraph);
+  range.collapse(true);
+  const selection = window.getSelection();
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
+
+function clearCurrentFormatting() {
+  const block = currentBlock();
+
+  document.execCommand("removeFormat");
+  document.execCommand("unlink");
+
+  if (!block) {
+    document.execCommand("formatBlock", false, "p");
+    return;
+  }
+
+  const paragraph = document.createElement("p");
+  paragraph.textContent = block.textContent.trim();
+  if (!paragraph.textContent) paragraph.innerHTML = "<br>";
+  replaceBlock(block, paragraph);
+}
+
 function runCommand(command) {
   els.editor.focus();
+  quoteExitArmedBlock = null;
 
   if (command === "h2") document.execCommand("formatBlock", false, "h2");
   if (command === "h3") document.execCommand("formatBlock", false, "h3");
@@ -387,6 +446,9 @@ function runCommand(command) {
   }
   if (command === "pullquote") {
     applyQuoteBlock("quote--pull");
+  }
+  if (command === "clear") {
+    clearCurrentFormatting();
   }
   if (command === "embed") {
     const input = prompt("Paste a YouTube URL, iframe, or embed HTML. It will be saved into the post markdown.");
@@ -577,7 +639,8 @@ function updateToolbarState() {
     h2: blockTag === "h2",
     h3: blockTag === "h3",
     quote: inBlockquote && !block.classList.contains("quote--pull"),
-    pullquote: inBlockquote && block.classList.contains("quote--pull")
+    pullquote: inBlockquote && block.classList.contains("quote--pull"),
+    clear: false
   };
 
   document.querySelectorAll("[data-command]").forEach((button) => {
@@ -1198,7 +1261,8 @@ async function loadLocalPostManifest() {
 async function loadPostList() {
   setStatus("Loading posts...");
   const config = getConfig();
-  const localPosts = await loadLocalPostManifest();
+  const localPosts = (await loadLocalPostManifest())
+    .filter((post) => !deletedPostPaths.has(post.path));
   const response = await githubRequest(`contents/${apiPath(config.postsDir)}?ref=${encodeURIComponent(config.branch)}`);
 
   if (response.status === 404) {
@@ -1333,6 +1397,7 @@ async function savePost() {
   const markdown = `${frontmatter()}\n\n${editorMarkdown()}\n`;
   const newPath = postPathFromSlug(slug);
   await putFile(newPath, base64FromText(markdown), `${wasUpdate ? "Update" : "Publish"} ${getTitle()}`);
+  deletedPostPaths.delete(newPath);
 
   if (currentPost && !currentPost.localOnly && currentPost.path !== newPath) {
     await deleteFile(currentPost.path, currentPost.sha, `Remove renamed post ${currentPost.name}`);
@@ -1353,9 +1418,42 @@ async function deletePost(path) {
 
   setStatus("Deleting post...");
   await deleteFile(post.path, post.sha, `Delete ${post.data.title || post.name}`);
-  if (deletingCurrent) resetEditor();
+  deletedPostPaths.add(post.path);
+  posts = posts.filter((item) => item.path !== post.path);
+  if (deletingCurrent) {
+    currentPost = null;
+    resetEditor();
+  } else {
+    renderPostList();
+  }
   await loadPostList();
   setStatus("Post deleted. GitHub Pages will rebuild on push.");
+}
+
+function handleEditorKeydown(event) {
+  if (event.key !== "Enter") {
+    quoteExitArmedBlock = null;
+    return;
+  }
+
+  if (event.shiftKey) return;
+
+  const block = currentBlock();
+  if (!block || block.tagName !== "BLOCKQUOTE") {
+    quoteExitArmedBlock = null;
+    return;
+  }
+
+  if (quoteExitArmedBlock === block) {
+    event.preventDefault();
+    insertParagraphAfterBlock(block);
+    quoteExitArmedBlock = null;
+    checkDirtyState();
+    updateToolbarState();
+    return;
+  }
+
+  quoteExitArmedBlock = block;
 }
 
 document.querySelectorAll("[data-command]").forEach((button) => {
@@ -1386,6 +1484,7 @@ els.postList.addEventListener("click", (event) => {
   loadSelectedPost(item.dataset.path).catch((error) => setStatus(error.message));
 });
 els.editor.addEventListener("keyup", handleMarkdownShortcut);
+els.editor.addEventListener("keydown", handleEditorKeydown);
 els.editor.addEventListener("click", handleGalleryAction);
 els.editor.addEventListener("click", handleImageAction);
 els.editor.addEventListener("click", handleMediaAction);
