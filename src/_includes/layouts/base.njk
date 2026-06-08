@@ -7,6 +7,18 @@
     <meta name="description" content="{{ excerpt or site.description }}">
     <meta name="theme-color" content="#efede9">
     <meta name="site-base-path" content="{{ '/' | withBasePath }}">
+    <script>
+      (() => {
+        try {
+          if (!sessionStorage.getItem("seufertNameIntroPlayed")) {
+            document.documentElement.classList.add("profile-name-first-load");
+            sessionStorage.setItem("seufertNameIntroPlayed", "true");
+          }
+        } catch {
+          document.documentElement.classList.add("profile-name-first-load");
+        }
+      })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sura:wght@400;700&display=swap" rel="stylesheet">

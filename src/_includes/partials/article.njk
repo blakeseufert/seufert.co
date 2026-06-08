@@ -10,12 +10,19 @@
   {% set postUrl = post.url or page.url %}
   <aside class="profile-panel" aria-label="About {{ site.author }}">
     <div class="profile-panel__portrait" aria-hidden="true">
-      {% for i in [1, 2, 3, 4, 5, 6, 7, 8] %}
-        <span class="profile-panel__streak profile-panel__streak--{{ i }}"></span>
-      {% endfor %}
+      <div class="profile-panel__rain" aria-hidden="true">
+        {% for i in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14] %}
+          <span class="profile-panel__rain-line profile-panel__rain-line--{{ i }}"></span>
+        {% endfor %}
+      </div>
       <img class="profile-panel__image" src="{{ site.profileImage }}" alt="">
     </div>
-    <h1 class="profile-panel__name">{{ site.author }}</h1>
+    <h1 class="profile-panel__name" aria-label="{{ site.author }}">
+      <span class="profile-panel__name-track" aria-hidden="true">
+        <span class="profile-panel__name-frame">Hi, I’m Blake</span>
+        <span class="profile-panel__name-frame">{{ site.author }}</span>
+      </span>
+    </h1>
     <p class="profile-panel__tagline">{{ site.tagline }}</p>
 
     <div class="role-list" aria-label="Roles">

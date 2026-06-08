@@ -272,12 +272,70 @@ button.pill {
   width: min(100%, 230px);
 }
 
+@keyframes profile-rain-fall {
+  from {
+    top: var(--rain-start, -130px);
+    transform: translate3d(0, 0, 0) rotate(var(--rain-angle, -20deg));
+  }
+
+  to {
+    top: var(--rain-end, calc(100% + 56px));
+    transform: translate3d(var(--rain-drift, 32px), 0, 0) rotate(var(--rain-angle, -20deg));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .profile-panel__rain-line {
+    animation: none !important;
+  }
+}
+
 .profile-panel__name {
   font-family: var(--font-display);
   font-size: clamp(1.65rem, 3vw, 2rem);
   font-weight: 700;
   line-height: 1.05;
   margin: 0;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  width: 100%;
+}
+
+.profile-panel__name-track {
+  display: flex;
+  transform: translateX(-50%);
+  width: 200%;
+}
+
+.profile-name-first-load .profile-panel__name-track {
+  animation: profile-name-slide 1500ms cubic-bezier(.72, 0, .18, 1) 480ms both;
+}
+
+.profile-panel__name-frame {
+  display: block;
+  flex: 0 0 50%;
+  overflow: hidden;
+  text-overflow: clip;
+  white-space: nowrap;
+}
+
+@keyframes profile-name-slide {
+  0%,
+  32% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .profile-panel__name-track {
+    animation: none;
+    transform: translateX(-50%);
+  }
 }
 
 .profile-panel__tagline {
@@ -938,55 +996,110 @@ figcaption {
     content: none;
   }
 
-  .profile-panel__streak {
-    background: rgba(217, 217, 217, 0.2);
-    border-radius: 10px;
-    display: block;
-    height: 80px;
+  .profile-panel__rain {
+    border-radius: inherit;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
     position: absolute;
-    transform: rotate(-15deg);
-    width: 8px;
     z-index: 0;
   }
 
-  .profile-panel__streak--1 {
+  .profile-panel__rain-line {
+    animation: profile-rain-fall var(--rain-duration, 14s) linear infinite;
+    background: rgba(217, 217, 217, 0.2);
+    border-radius: 10px;
+    display: block;
+    height: 82px;
+    opacity: 0.56;
+    position: absolute;
+    top: var(--rain-start, -130px);
+    transform: rotate(var(--rain-angle, -20deg));
+    width: 8px;
+  }
+
+  .profile-panel__rain-line--1 {
+    --rain-duration: 13s;
+    animation-delay: -2s;
     left: 14px;
-    top: 60px;
   }
 
-  .profile-panel__streak--2 {
+  .profile-panel__rain-line--2 {
+    --rain-duration: 16s;
+    animation-delay: -8s;
     left: 36px;
-    top: 70px;
   }
 
-  .profile-panel__streak--3 {
+  .profile-panel__rain-line--3 {
+    --rain-duration: 12s;
+    animation-delay: -5s;
     left: 64px;
-    top: 12px;
   }
 
-  .profile-panel__streak--4 {
+  .profile-panel__rain-line--4 {
+    --rain-duration: 15s;
+    animation-delay: -12s;
     left: 93px;
-    top: 33px;
   }
 
-  .profile-panel__streak--5 {
+  .profile-panel__rain-line--5 {
+    --rain-duration: 13.5s;
+    animation-delay: -9s;
     left: 146px;
-    top: 5px;
   }
 
-  .profile-panel__streak--6 {
+  .profile-panel__rain-line--6 {
+    --rain-duration: 17s;
+    animation-delay: -15s;
     left: 174px;
-    top: 23px;
   }
 
-  .profile-panel__streak--7 {
+  .profile-panel__rain-line--7 {
+    --rain-duration: 14.5s;
+    animation-delay: -7s;
     left: 211px;
-    top: 52px;
   }
 
-  .profile-panel__streak--8 {
+  .profile-panel__rain-line--8 {
+    --rain-duration: 16.5s;
+    animation-delay: -4s;
     left: 233px;
-    top: 14px;
+  }
+
+  .profile-panel__rain-line--9 {
+    --rain-duration: 12.8s;
+    animation-delay: -10s;
+    left: 4px;
+  }
+
+  .profile-panel__rain-line--10 {
+    --rain-duration: 15.7s;
+    animation-delay: -1s;
+    left: 53px;
+  }
+
+  .profile-panel__rain-line--11 {
+    --rain-duration: 13.8s;
+    animation-delay: -6s;
+    left: 119px;
+  }
+
+  .profile-panel__rain-line--12 {
+    --rain-duration: 17.8s;
+    animation-delay: -13s;
+    left: 160px;
+  }
+
+  .profile-panel__rain-line--13 {
+    --rain-duration: 14.2s;
+    animation-delay: -11s;
+    left: 196px;
+  }
+
+  .profile-panel__rain-line--14 {
+    --rain-duration: 16.8s;
+    animation-delay: -16s;
+    left: 244px;
   }
 
   .profile-panel__image {
@@ -999,7 +1112,7 @@ figcaption {
     object-fit: contain;
     object-position: bottom center;
     position: absolute;
-    top: -24px;
+    bottom: 0;
     width: 160px;
     z-index: 1;
   }
@@ -1007,8 +1120,9 @@ figcaption {
   .profile-panel__name {
     font-size: 2.4806rem;
     line-height: 1.05;
-    margin: 0 0 8px;
+    margin: 0 0 8px auto;
     white-space: nowrap;
+    width: 100%;
   }
 
   .profile-panel__tagline {
@@ -2023,6 +2137,113 @@ figcaption {
     display: none;
   }
 
+  .profile-panel__rain {
+    border-radius: inherit;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    position: absolute;
+    z-index: 0;
+  }
+
+  .profile-panel__rain-line {
+    animation: profile-rain-fall var(--rain-duration, 14s) linear infinite;
+    background: rgba(217, 217, 217, 0.18);
+    border-radius: 10px;
+    display: block;
+    height: clamp(76px, 20vw, 112px);
+    opacity: 0.52;
+    position: absolute;
+    --rain-drift: 26px;
+    top: var(--rain-start, -150px);
+    transform: rotate(var(--rain-angle, -20deg));
+    width: clamp(7px, 1.7vw, 10px);
+  }
+
+  .profile-panel__rain-line--1 {
+    --rain-duration: 13s;
+    animation-delay: -2s;
+    left: 7%;
+  }
+
+  .profile-panel__rain-line--2 {
+    --rain-duration: 16s;
+    animation-delay: -8s;
+    left: 16%;
+  }
+
+  .profile-panel__rain-line--3 {
+    --rain-duration: 12s;
+    animation-delay: -5s;
+    left: 27%;
+  }
+
+  .profile-panel__rain-line--4 {
+    --rain-duration: 15s;
+    animation-delay: -12s;
+    left: 40%;
+  }
+
+  .profile-panel__rain-line--5 {
+    --rain-duration: 13.5s;
+    animation-delay: -9s;
+    left: 58%;
+  }
+
+  .profile-panel__rain-line--6 {
+    --rain-duration: 17s;
+    animation-delay: -15s;
+    left: 70%;
+  }
+
+  .profile-panel__rain-line--7 {
+    --rain-duration: 14.5s;
+    animation-delay: -7s;
+    left: 83%;
+  }
+
+  .profile-panel__rain-line--8 {
+    --rain-duration: 16.5s;
+    animation-delay: -4s;
+    left: 92%;
+  }
+
+  .profile-panel__rain-line--9 {
+    --rain-duration: 12.8s;
+    animation-delay: -10s;
+    left: 2%;
+  }
+
+  .profile-panel__rain-line--10 {
+    --rain-duration: 15.7s;
+    animation-delay: -1s;
+    left: 22%;
+  }
+
+  .profile-panel__rain-line--11 {
+    --rain-duration: 13.8s;
+    animation-delay: -6s;
+    left: 35%;
+  }
+
+  .profile-panel__rain-line--12 {
+    --rain-duration: 17.8s;
+    animation-delay: -13s;
+    left: 51%;
+  }
+
+  .profile-panel__rain-line--13 {
+    --rain-duration: 14.2s;
+    animation-delay: -11s;
+    left: 76%;
+  }
+
+  .profile-panel__rain-line--14 {
+    --rain-duration: 16.8s;
+    animation-delay: -16s;
+    left: 97%;
+  }
+
   .profile-panel__image {
     background: transparent;
     border-radius: 0;
@@ -2036,6 +2257,7 @@ figcaption {
     position: absolute;
     transform: translateX(-50%);
     width: min(58vw, 260px);
+    z-index: 1;
   }
 
   .profile-panel__name,
