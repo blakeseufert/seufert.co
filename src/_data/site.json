@@ -4,9 +4,13 @@
   "author": "Blake Seufert",
   "tagline": "Building lasting, high quality systems and technology",
   "description": "Writing on technology, education systems, risk, and sustainable digital operations.",
-  "assetVersion": "20260608-mobile-profile-footer",
+  "assetVersion": "20260608-expandable-bio",
   "profileImage": "/assets/uploads/blake-profile.webp",
-  "bio": "Blake has worked with major companies like Google and Microsoft, as well as over 100 schools and school groups in Australia. He has spoken at conferences and been published in top publications.",
+  "bioIntro": "Hi, I’m Blake. I’ve been incredibly lucky to spend my career working at the intersection of education and technology. Over the years, I’ve had the privilege of collaborating with fantastic teams in over 100 schools and school groups across Australia to help them navigate their digital journeys.",
+  "bioMore": [
+    "Along the way, I've been invited to work with Google, Microsoft and other large tech companies. I’ve shared my experiences at various conferences and written for some wonderful publications.",
+    "Driven by a desire to make tangible improvements in schools, I co-founded an Edtech company called Naavi and helped establish the Consortium of Educational Technology to support our local schools' technology progress. For me, it’s not just about the tech itself, but about building the leadership, design, and confidence that schools need to truly thrive. I genuinely believe that when we get technology right, we can make education a whole lot better for students and staff."
+  ],
   "social": [
     {
       "label": "Email",

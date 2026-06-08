@@ -48,6 +48,25 @@ function closeShareClusters() {
   });
 }
 
+function setupProfileBioToggle() {
+  const toggle = document.querySelector("[data-profile-bio-toggle]");
+  const more = document.getElementById(toggle?.getAttribute("aria-controls") || "");
+  const label = toggle?.querySelector("[data-profile-bio-label]");
+  const panel = toggle?.closest(".profile-panel");
+
+  if (!toggle || !more || !label || !panel) return;
+
+  toggle.addEventListener("click", () => {
+    const isOpen = toggle.getAttribute("aria-expanded") === "true";
+    const nextOpen = !isOpen;
+
+    toggle.setAttribute("aria-expanded", String(nextOpen));
+    more.hidden = !nextOpen;
+    panel.classList.toggle("profile-panel--bio-open", nextOpen);
+    label.textContent = nextOpen ? "Less About Blake" : "More About Blake";
+  });
+}
+
 function setupPostImageLightbox() {
   const images = document.querySelectorAll(".post-body img");
   if (!images.length) return;
@@ -183,4 +202,5 @@ function setupPostImageLightbox() {
 }
 
 setupShareLinks();
+setupProfileBioToggle();
 setupPostImageLightbox();

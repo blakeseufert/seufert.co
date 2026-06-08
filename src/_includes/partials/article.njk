@@ -46,8 +46,18 @@
       {% endfor %}
     </div>
 
-    <p class="profile-panel__bio">{{ site.bio }}</p>
-    <a class="profile-panel__more" href="mailto:hello@seufert.co">More About Blake <span aria-hidden="true">⌄</span></a>
+    <div class="profile-panel__bio" data-profile-bio>
+      <p>{{ site.bioIntro }}</p>
+      <div class="profile-panel__bio-more" id="profile-bio-more" hidden>
+        {% for paragraph in site.bioMore %}
+          <p>{{ paragraph }}</p>
+        {% endfor %}
+      </div>
+    </div>
+    <button class="profile-panel__more" type="button" aria-expanded="false" aria-controls="profile-bio-more" data-profile-bio-toggle>
+      <span data-profile-bio-label>More About Blake</span>
+      <span aria-hidden="true">⌄</span>
+    </button>
     <p class="profile-panel__made">Made with <a href="/editor/" aria-label="Open editor">♥</a> in Melbourne</p>
   </aside>
 
