@@ -2,14 +2,12 @@
 layout: layouts/post.njk
 title: "VR in Education: Why It’s Still a Bumpy Ride"
 date: 2024-11-01
-excerpt: "Left align Add to gallery Remove image SI’ve been cautiously optimistic about VR’s potential in the classroom. It’s hard not to get excited about technology that promises a leap in"
+excerpt: "I’ve been cautiously optimistic about VR’s potential in the classroom. It’s hard not to get excited about technology that promises a leap in immersion and hands-on learning. Here’s"
 cover: "/assets/uploads/vr-in-education-why-it-s-still-a-bumpy-ride-1_rxqsvtrgrbylcvtni9gkga.webp"
 coverAlt: "VR in Education: Why It’s Still a Bumpy Ride"
 ---
 
-{% image "/assets/uploads/vr-in-education-why-it-s-still-a-bumpy-ride-hero__cvgr5aj1ttsi_large.jpg", "", "full" %}
-
-SI’ve been cautiously optimistic about VR’s potential in the classroom. It’s hard not to get excited about technology that promises a leap in immersion and hands-on learning. Here’s the reality from our experience with VR at McKinnon.
+I’ve been cautiously optimistic about VR’s potential in the classroom. It’s hard not to get excited about technology that promises a leap in immersion and hands-on learning. Here’s the reality from our experience with VR at McKinnon.
 
 ### Our First Foray: Windows Mixed Reality
 
