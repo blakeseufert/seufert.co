@@ -19,15 +19,15 @@ Compounding this is a massive misnomer in ed-tech: the idea that software is eve
 
 > Third-party vendor risk is universally viewed as one of the most difficult security challenges to manage, and because it's hard, it’s usually left until last and done poorly.
 
-## 
+##
 
 ## Two Things School IT Teams Must Do Better
 
 1. Radical Transparency
-We need a better method for clearly communicating exactly which third-party vendors we are invested in and what data they hold. This shouldn't be a hidden compliance register, but rather a public list of our digital partners for parents to build trust and awareness.
-2. Stop Appointing Absolution 
-We have a habit of absolving ourselves of blame when things go wrong. Microsoft Windows bugs, SIS system failures, and Office 365 glitches happen constantly. When small or massive incidents occur, the default defense is often, "Well, everyone is experiencing it, what could we do?" We need to reject that complacency. 
-Look no further than the irony of the historic CrowdStrike outage that crippled global infrastructure. Instead of being abandoned by the market, the company was recently named a leader in the 2026 Gartner Magic Quadrant for endpoint protection and is enjoying unprecedented success. The dangers of this "Too Big to Fail" mentality in enterprise tech. Consumers and organisations fall victim to "status quo bias"—the brain's tendency to stick with the familiar to avoid the perceived logistical nightmare of switching vendors. No one ever got fired for buying IBM, Microsoft, or CrowdStrike even when they take the network down. We don't feel the same pressure when vendors fail vs if we'd built the system ourself, but we should!
+2. We need a better method for clearly communicating exactly which third-party vendors we are invested in and what data they hold. This shouldn't be a hidden compliance register, but rather a public list of our digital partners for parents to build trust and awareness.
+3. Stop Appointing Absolution
+4. We have a habit of absolving ourselves of blame when things go wrong. Microsoft Windows bugs, SIS system failures, and Office 365 glitches happen constantly. When small or massive incidents occur, the default defense is often, "Well, everyone is experiencing it, what could we do?" We need to reject that complacency.
+5. Look no further than the irony of the historic CrowdStrike outage that crippled global infrastructure. Instead of being abandoned by the market, the company was recently named a leader in the 2026 Gartner Magic Quadrant for endpoint protection and is enjoying unprecedented success. The dangers of this "Too Big to Fail" mentality in enterprise tech. Consumers and organisations fall victim to "status quo bias"—the brain's tendency to stick with the familiar to avoid the perceived logistical nightmare of switching vendors. No one ever got fired for buying IBM, Microsoft, or CrowdStrike even when they take the network down. We don't feel the same pressure when vendors fail vs if we'd built the system ourself, but we should!
 
 ## Ownership Over Outages
 
