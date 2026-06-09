@@ -4,7 +4,7 @@
   "author": "Blake Seufert",
   "tagline": "Building lasting, high quality systems and technology",
   "description": "Writing on technology, education systems, risk, and sustainable digital operations.",
-  "assetVersion": "20260609-editor-fixes",
+  "assetVersion": "20260609-contact-links",
   "profileImage": "/assets/uploads/blake-profile.webp",
   "bioIntro": "Hi, I’m Blake. I’ve been incredibly lucky to spend my career working at the intersection of education and technology.",
   "bioMore": [
@@ -15,8 +15,8 @@
   "social": [
     {
       "label": "Email",
-      "url": "mailto:blake@seufert.co",
-      "contact": "blake@seufert.co"
+      "url": "mailto:hello@seufert.co",
+      "contact": "hello@seufert.co"
     },
     {
       "label": "LinkedIn",
