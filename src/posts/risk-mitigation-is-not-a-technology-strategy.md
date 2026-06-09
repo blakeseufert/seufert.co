@@ -1,7 +1,7 @@
 ---
 layout: layouts/post.njk
 title: "Risk Mitigation is not a Technology Strategy"
-date: 2026-06-23
+date: 2025-07-23
 excerpt: "Lately, I’ve noticed a concerning shift in the role of the educational IT teams. Many have started settling into a role of risk mitigators rather than innovators. A defensive stanc"
 cover: "/assets/uploads/risk-mitigation-is-not-a-technology-strategy-1_m-ei0cqq9-n-pkzeqcho4g.webp"
 coverAlt: "Risk Mitigation is not a Technology Strategy"
