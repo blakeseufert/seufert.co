@@ -2,10 +2,12 @@
 layout: layouts/post.njk
 title: "VR in Education: Why It’s Still a Bumpy Ride"
 date: 2024-11-01
-excerpt: "SI’ve been cautiously optimistic about VR’s potential in the classroom. It’s hard not to get excited about technology that promises a leap in immersion and hands-on learning. Here’"
+excerpt: "Left align Add to gallery Remove image SI’ve been cautiously optimistic about VR’s potential in the classroom. It’s hard not to get excited about technology that promises a leap in"
 cover: "/assets/uploads/vr-in-education-why-it-s-still-a-bumpy-ride-1_rxqsvtrgrbylcvtni9gkga.webp"
 coverAlt: "VR in Education: Why It’s Still a Bumpy Ride"
 ---
+
+{% image "/assets/uploads/vr-in-education-why-it-s-still-a-bumpy-ride-hero__cvgr5aj1ttsi_large.jpg", "", "full" %}
 
 SI’ve been cautiously optimistic about VR’s potential in the classroom. It’s hard not to get excited about technology that promises a leap in immersion and hands-on learning. Here’s the reality from our experience with VR at McKinnon.
 
@@ -28,8 +30,11 @@ The question I keep coming back to is:
 {% endpullquote %}
 
 In our classrooms, VR often felt more like fun activity than targeted learning. This is understandable, given the reliability issues and the lack of tools for teachers to control the experience and scaffold learning. Add to this the need for a tech support member on standby to troubleshoot, and it’s clear that until reliability and management tools improve, VR in education will remain challenging to scale.
+
 The Promise of VR — and Its Reality
 There’s no shortage of exciting VR ideas out there. Apps like Google Earth VR promise to let students explore the world as never before. Experiences like “Becoming Homeless” provide an immersive way to understand social issues, while creative tools like Tilt Brush hint at what might be possible for budding artists. Yet many of these experiences are incomplete or abandoned, even a decade in. Google Earth VR, for example, never fully supported our controllers, crashed frequently, and saw no updates in the three years we used it. When VR did work, it was often simpler, “on-rails” content — essentially VR videos — that ended up being the most reliable.
-There’s also the question of creation within VR. Most experiences still lean toward passive consumption. Apps like CoSpaces offer a glimpse of what’s possible with student-created content, allowing users to build and explore their own VR worlds, but they often work better on a computer than inside the headset.
+There’s also the question of creation within VR.
+
+Most experiences still lean toward passive consumption. Apps like CoSpaces offer a glimpse of what’s possible with student-created content, allowing users to build and explore their own VR worlds, but they often work better on a computer than inside the headset.
 So, Is VR in Education Worth It?
 Despite the struggles, I’m not ready to throw VR out entirely. It still holds potential, but right now, the reality does not match our expectations. Schools should to be aware of the challenges and limitations upfront and plan accordingly. VR is worth exploring if you’re clear about your goals and have the right hardware and content available. But any investment should come with the understanding that VR is still very much a “work in progress.”
