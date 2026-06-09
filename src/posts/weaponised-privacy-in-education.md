@@ -1,7 +1,7 @@
 ---
 layout: layouts/post.njk
 title: "Weaponised Privacy” in Education"
-date: 2026-09-05
+date: 2025-09-05
 excerpt: "Five years ago, I wrote about the troubling frequency with which IT teams had access to your passwords. Back then, it was alarmingly not seen as a pressing issue. Today, things are"
 cover: "/assets/uploads/weaponised-privacy-in-education-1_7no4s8ycbv4thr80ekeooq-1-.webp"
 coverAlt: "Weaponised Privacy” in Education"
