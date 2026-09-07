@@ -47,4 +47,6 @@ As primary schools reduce structured technology integration, we’re anticipatin
 
 At the same time, this shift introduces increased accountability. It transitions students away from an all-inclusive, break-and-swap safety net we enjoy with Chromebooks in the junior years to more direct responsibility for their device care, with excess fees for device damage and considerations for backing up local data during a repair process. Matching increased freedom with real-world responsibility reflects the developmental growth we want to see as students mature through senior school and are taken through our digital citizenship curriculum in Junior School.
 
-In Chromebooks trying to be everything (local virtual machines, Android Apps, offline media, etc) Chrome OS lost its simple, web-first vision. The irony is that right now a MacBook Neo is a better Chromebook.
+In Chromebooks trying to be everything (local virtual machines, Android Apps, offline media, etc) Chrome OS lost its simple, web-first vision.
+
+The irony is that right now a MacBook Neo is a better Chromebook.
